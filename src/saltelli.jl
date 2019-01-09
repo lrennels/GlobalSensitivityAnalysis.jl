@@ -79,31 +79,44 @@ function saltelli_sample(params::SobolParams, N::Int, method="quasi-random")
 
     if method == "quasi-random"
         base_seq = sobol_sequence(N + numskip, 2 * D)
-        base_seq = base_seq[numskip + 1:end, :]
-
-        # scale 
-        base_seq = scale_sobol_seq(base_seq, params.dists)
+        base_seq = scale_sobol_seq(base_seq, params.dists) #scale
     else
         # TODO: how to we want to plug random in here?  Mimi hook.
     end
 
+    index = 1
+
     # create the Saltelli sequence
     saltelli_seq = zeros(N * (D + 2), D)
 
-    # copy matrix "A" into the beginnning of the saltelli sequence [4]
-    saltelli_seq[1:N, :] = base_seq[1:N, 1:D]
+    for i in (numskip + 1): (N + numskip)
 
-    # for each parameter, place elements of "B" into "A" and insert into Saltelli
-    # sequence to create an "AB" for each parameter [4]
-    for i in 1:D
-        row = i * N + 1
-        saltelli_seq[row:(row + N - 1), :] = base_seq[:, 1:D] # AB = A
-        saltelli_seq[row:(row + N - 1), i] = base_seq[:, D + i] # insert slice of B
+        # copy matrix "A" into the beginnning of the saltelli sequence [4]
+        for j in 1:D
+            saltelli_seq[index, j] = base_seq[i, j]
+        end
+        index += 1
+
+        # for each parameter, place elements of "B" into "A" and insert into Saltelli
+        # sequence to create an "AB" for each parameter [4]
+        for k in 1:D
+            for j in 1:D
+                if j == k
+                    saltelli_seq[index, j] = base_seq[i, j + D]
+                else
+                    saltelli_seq[index, j] = base_seq[i, j]
+                end
+            end
+            index += 1
+        end
+
+        # copy matrix "B" into the end of the saltelli sequence [4]
+        for j in 1:D
+            saltelli_seq[index, j] = base_seq[i, j + D]
+        end
+        index += 1
     end
 
-    # copy matrix "B" into the end of the saltelli sequence [4]
-    saltelli_seq[end - N + 1:end, :] = base_seq[:, D+1:end]
-
-    # scale the distributions
+    # return
     return saltelli_seq
 end
