@@ -83,7 +83,7 @@ function saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Union{
     # number of uncertain parameters in problem
     D = length(params.names)
 
-    if base_sequence == nothing
+    if rand_base_sequence == nothing
         base_seq = sobol_sequence(N + numskip, 2 * D)
         base_seq = scale_sobol_seq(base_seq, params.dists) #scale
     else

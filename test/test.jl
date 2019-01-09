@@ -1,6 +1,7 @@
 using Distributions
 using Test
 using DataFrames
+using CSVFiles
 
 ################################################################################
 ## JULIA
