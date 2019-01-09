@@ -24,6 +24,8 @@ References
         John Wiley & Sons, 2008.
 =#
 
+# TODO - parameterize Arrays
+
 """
     SobolParams
 
@@ -54,34 +56,40 @@ function scale_sobol_seq(sequence::Array, dists::Array{Distribution, 1})
 end
 
 """
-    saltelli_sample(params::SobolParams, N::Int, method="quasi-random")
+    saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Array = nothing)
 
 Generate a matrix containing the model inputs for Sobol sensitivity analysis with `N` 
-samples and uncertain parameters described by `params`. The method used to
-generate the sequence is defined by `seq_method` and can be (1) `quasi-random`, 
-currently the Sobol sequence, or (2) `random`. Regardless of the method used, we
-then apply Saltelli's extension of the Sobol sequence. Saltelli's scheme extends 
-the Sobol sequence in a way to reduce the error rates in the resulting sensitivity 
-index calculations, which is irrelevant if the `.  
+samples and uncertain parameters described by `params`. If no `rand_base_sequence` of
+parameters is provided, a Sobol sequence (a quasi-rand low-discrepancy sequence)
+will be computed. A provided base sequence must be of dimensions `2N` by `D` where
+`N` is the number of samples and `D`is the number of uncertain parameters.
 
-The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters.  
+NOTE: It is important to note that if a `rand_base_sequence` is provided, it is assumed
+to be rand and thus no values are skipped.
+
+We then apply Saltelli's extension of the Sobol  sequence. Saltelli's scheme extends 
+the Sobol sequence in a way to reduce the error rates in the resulting sensitivity 
+index calculations, which is irrelevant if the method is `random`. 
+
+The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters. 
 """
 # TODO - include second order effects
 # TODO - include groups
-function saltelli_sample(params::SobolParams, N::Int, method="quasi-random")
+function saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Union{Nothing, Array} = nothing)
 
-    # set number of values to skip from the initial sequence (TODO - why do we need 
-    # to skip values?  used so can validate against SALib but unclear why this is required)
+    # set number of values to skip from the initial sequence 
     numskip = 1000
 
     # number of uncertain parameters in problem
     D = length(params.names)
 
-    if method == "quasi-random"
+    if base_sequence == nothing
         base_seq = sobol_sequence(N + numskip, 2 * D)
         base_seq = scale_sobol_seq(base_seq, params.dists) #scale
     else
-        # TODO: how to we want to plug random in here?  Mimi hook.
+        base_seq = zeros(N + numskip, 2 * D) # preallocate and include dummy skip values
+        base_seq[numskip + 1:end, 1:D] = rand_base_sequence[1:N, :] # insert "A"
+        base_seq[numskip + 1:end, D+1:end] = rand_base_sequence[N+1:end, :] # insert "B"
     end
 
     index = 1
@@ -110,7 +118,7 @@ function saltelli_sample(params::SobolParams, N::Int, method="quasi-random")
             index += 1
         end
 
-        # copy matrix "B" into the end of the saltelli sequence [4]
+        # copy matrix "B" into the the saltelli sequence [4]
         for j in 1:D
             saltelli_seq[index, j] = base_seq[i, j + D]
         end
