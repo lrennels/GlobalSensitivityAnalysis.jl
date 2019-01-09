@@ -10,5 +10,11 @@ params = SobolParams(
     Uniform(-3.14159265359, 3.14159265359)]
 )
 N = 100000
-# generate samples
+D = 3
+
+# generate samples using Sobol sequence
 saltelli_sample(params, N)
+
+# generate samples using a given sequence
+input_data = rand(2N, D)
+saltelli_sample(params, N, rand_base_sequence = input_data)

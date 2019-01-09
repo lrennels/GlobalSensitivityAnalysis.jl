@@ -36,25 +36,5 @@ py_saltelli = load("data/py_saltelli.csv", header_exists=false, colnames = ["x1"
 
 @testset "Sampling" begin
     @test convert(Matrix, julia_sobol) ≈ convert(Matrix, py_sobol) atol = 1e-9
-
-    # check pieces of py_saltelli
-    julia_A = julia_saltelli[1:N, :]
-    py_A = py_saltelli[1:N, :]
-    @test convert(Matrix, julia_A) ≈ convert(Matrix, py_A) atol = 1e-3
-
-    # check pieces of py_saltelli (A, ABs, and B) because currently the Python
-    # version from SALib also includes the BAs for second order, but we do not 
-    # include those
-    julia_A = julia_saltelli[1:N, :]
-    py_A = py_saltelli[1:N, :]
-    @test convert(Matrix, julia_A) ≈ convert(Matrix, py_A) atol = 1e-3
-
-    julia_ABs = julia_saltelli[N+1:end - N, :]
-    py_ABs = py_saltelli[N+1:(N+1) + (N*D) - 1, :]
-    @test convert(Matrix, julia_A) ≈ convert(Matrix, py_A) atol = 1e-3
-
-    julia_B = julia_saltelli[end-N+1:end, :]
-    py_B = py_saltelli[end-N+1:end, :]
-    @test convert(Matrix, julia_B) ≈ convert(Matrix, py_B) atol = 1e-3
-
+    @test convert(Matrix, julia_saltelli) ≈ convert(Matrix, py_saltelli) atol = 1e-9
 end
