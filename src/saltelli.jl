@@ -23,9 +23,6 @@ References
     [4] Saltelli, Andrea, et al. Global sensitivity analysis: the primer. 
         John Wiley & Sons, 2008.
 =#
-
-# TODO - parameterize Arrays
-
 """
     SobolParams
 
@@ -33,18 +30,18 @@ Implement a `SobolParams` type containing the `names` of the uncertain parameter
 of the problem, and the distributions `dists`, corresponding to each parameter.
 """
 mutable struct SobolParams
-    names::Array{String, 1}
-    dists::Array{Distribution, 1}
+    names::AbstractArray{String, 1}
+    dists::AbstractArray{Distribution, 1}
 end
 
 """
-    scale_sobol_seq(sequence::Array, dists::Array{Distribution, 1})
+    scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
 
 Rescale a Sobol `sequence` of parameters from the 0-to-1 range to the defined bounds
 of their distributions `dists`.  This function requires the parameters to have
 uniform distributions as of now.
 """
-function scale_sobol_seq(sequence::Array, dists::Array{Distribution, 1})
+function scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
     for dist in dists
         if !(typeof(dist)  <: Uniform)
             error("scale_params can only scale parameters with Uniform distributions")
@@ -56,7 +53,7 @@ function scale_sobol_seq(sequence::Array, dists::Array{Distribution, 1})
 end
 
 """
-    saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Array = nothing)
+    saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::AbstractArray{<:Number, 2} = nothing)
 
 Generate a matrix containing the model inputs for Sobol sensitivity analysis with `N` 
 samples and uncertain parameters described by `params`. If no `rand_base_sequence` of
@@ -75,7 +72,7 @@ The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parame
 """
 # TODO - include second order effects
 # TODO - include groups
-function saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Union{Nothing, Array} = nothing)
+function saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Union{Nothing, AbstractArray{<:Number, 2}} = nothing)
 
     # set number of values to skip from the initial sequence 
     numskip = 1000
