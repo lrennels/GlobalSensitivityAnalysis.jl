@@ -16,9 +16,5 @@ D = 3
 # generate samples using Sobol sequence
 param_values = saltelli_sample(params, N)
 
-# generate samples using a given sequence
-input_data = rand(2N, D)
-rand_param_values = saltelli_sample(params, N, rand_base_sequence = input_data)
-
 # Run model (example)
 Y = ishigami(param_values)

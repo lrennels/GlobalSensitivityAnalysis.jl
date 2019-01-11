@@ -53,26 +53,17 @@ function scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractAr
 end
 
 """
-    saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::AbstractArray{<:Number, 2} = nothing)
+    saltelli_sample(params::SobolParams, N::Int)
 
 Generate a matrix containing the model inputs for Sobol sensitivity analysis with `N` 
-samples and uncertain parameters described by `params`. If no `rand_base_sequence` of
-parameters is provided, a Sobol sequence (a quasi-rand low-discrepancy sequence)
-will be computed. A provided base sequence must be of dimensions `2N` by `D` where
-`N` is the number of samples and `D`is the number of uncertain parameters.
-
-NOTE: It is important to note that if a `rand_base_sequence` is provided, it is assumed
-to be rand and thus no values are skipped.
-
-We then apply Saltelli's extension of the Sobol  sequence. Saltelli's scheme extends 
-the Sobol sequence in a way to reduce the error rates in the resulting sensitivity 
-index calculations, which is irrelevant if the method is `random`. 
-
+samples and uncertain parameters described by `params`. We then apply Saltelli's 
+extension of the Sobol  sequence. Saltelli's scheme extends the Sobol sequence in 
+a way to reduce the error rates in the resulting sensitivity index calculations. 
 The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters. 
 """
 # TODO - include second order effects
 # TODO - include groups
-function saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Union{Nothing, AbstractArray{<:Number, 2}} = nothing)
+function saltelli_sample(params::SobolParams, N::Int)
 
     # set number of values to skip from the initial sequence 
     numskip = 1000
@@ -80,14 +71,8 @@ function saltelli_sample(params::SobolParams, N::Int; rand_base_sequence::Union{
     # number of uncertain parameters in problem
     D = length(params.names)
 
-    if rand_base_sequence == nothing
-        base_seq = sobol_sequence(N + numskip, 2 * D)
-        base_seq = scale_sobol_seq(base_seq, params.dists) #scale
-    else
-        base_seq = zeros(N + numskip, 2 * D) # preallocate and include dummy skip values
-        base_seq[numskip + 1:end, 1:D] = rand_base_sequence[1:N, :] # insert "A"
-        base_seq[numskip + 1:end, D+1:end] = rand_base_sequence[N+1:end, :] # insert "B"
-    end
+    base_seq = sobol_sequence(N + numskip, 2 * D)
+    base_seq = scale_sobol_seq(base_seq, params.dists) #scale
 
     index = 1
 
