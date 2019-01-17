@@ -20,8 +20,6 @@ References
         output.  Design and estimator for the total sensitivity index."
         Computer Physics Communications, 181(2):259-270,
         doi:10.1016/j.cpc.2009.09.018.
-    [4] Saltelli, Andrea, et al. Global sensitivity analysis: the primer. 
-        John Wiley & Sons, 2008.
 =#
 
 """
@@ -34,7 +32,6 @@ uncertain parameters.
 """
 # TODO - include second order effects
 # TODO - include groups
-# TODO - add page numbers for all equations 
 function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number, 2})
 
     # define constants
@@ -44,8 +41,7 @@ function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number
     # normalize model output
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
 
-    # get the required parts of the model output from A, B, and AB
-    stepsize = D + 2
+    # separate the model_output into results from "A". "B" and "AB" 
     A = model_output[1:stepsize:end]
     B = model_output[stepsize:stepsize:end]
     
@@ -73,7 +69,8 @@ end
     first_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 2}, B::AbstractArray{<:Number, 1})
 
 Calculate the first order sensitivity indicies for model outputs given model outputs
-separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`
+separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. [Saltelli et al., 
+2010 Table 2 eq (b)]
 """
 function first_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 1}, B::AbstractArray{<:Number, 1})
     return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))[1]
@@ -83,7 +80,8 @@ end
     total_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 2}, B::AbstractArray{<:Number, 1})
 
 Calculate the total order sensitivity indicies for model outputs given model outputs
-separated out into `A`, `AB`, and `A` and normalize.
+separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. [Saltelli et al., 
+2010 Table 2 eq (f)].
 """
 function total_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 1}, B::AbstractArray{<:Number, 1})
     return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))[1]

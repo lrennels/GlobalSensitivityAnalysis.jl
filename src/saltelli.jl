@@ -21,8 +21,6 @@ References
         output.  Design and estimator for the total sensitivity index."
         Computer Physics Communications, 181(2):259-270,
         doi:10.1016/j.cpc.2009.09.018.
-    [4] Saltelli, Andrea, et al. Global sensitivity analysis: the primer. 
-        John Wiley & Sons, 2008.
 =#
 
 """
@@ -52,35 +50,38 @@ function saltelli_sample(params::SobolParams, N::Int)
     # create the Saltelli sequence
     saltelli_seq = Array{Float64}(undef, N * (D + 2), D)
 
+    # The Saltelli sequence is made up of N blocks of (D + 2) rows, where each block
+    # j contains a first row from A_j, a last row B_j and D middle rows that form 
+    # AB_j. [Saltelli et al., 2010 see Radial Sampling]
+
     for i in (numskip + 1): (N + numskip)
 
-        # copy matrix "A" into the beginnning of the saltelli sequence [4]
+        # copy matrix "A" (first row of each block)
         for j in 1:D
             saltelli_seq[index, j] = base_seq[i, j]
         end
         index += 1
 
-        # for each parameter, place elements of "B" into "A" and insert into Saltelli
-        # sequence to create an "AB" for each parameter [4]
+        # for each parameter, place elements of "B" into "A" and insert those D rows
+        # of "AB" (middle rows of each block)
         for k in 1:D
             for j in 1:D
                 if j == k
-                    saltelli_seq[index, j] = base_seq[i, j + D]
+                    saltelli_seq[index, j] = base_seq[i, j + D] # from B
                 else
-                    saltelli_seq[index, j] = base_seq[i, j]
+                    saltelli_seq[index, j] = base_seq[i, j] # from A
                 end
             end
             index += 1
         end
 
-        # copy matrix "B" into the the saltelli sequence [4]
+        # copy matrix "B" (last row of each block)
         for j in 1:D
             saltelli_seq[index, j] = base_seq[i, j + D]
         end
         index += 1
     end
 
-    # return
     return saltelli_seq
 end
 
