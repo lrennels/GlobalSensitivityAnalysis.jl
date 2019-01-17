@@ -45,4 +45,9 @@ end
 
 @testset "Analysis" begin
     @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) atol = 1e-9
+
+    # TODO - SI and ST tests 
+    # - A, AB, and B 
+    # = first order
+    # - total order
 end

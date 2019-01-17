@@ -24,21 +24,6 @@ library for sensitivity analysis. Journal of Open Source Software, 2(9)
 =#
 
 """
-    index_of_least_significant_zero_bit(value::Int)
-
-Return the 1-indexed index of the least significant zero bit of `value`
-"""
-function index_of_least_significant_zero_bit(value::Int)
-    index = 2
-    while (value & 1) != 0
-        value >>= 1
-        index +=1
-    end
-
-    return index
-end
-
-"""
     sobol_sequence(N::Int, D::Int)
 
 Generate `N` by `D` array of Sobol sequence samples
@@ -47,7 +32,7 @@ function sobol_sequence(N::Int, D::Int)
 
     # Generate (N x D) numpy array of Sobol sequence samples
     scale = 31
-    result = zeros(N, D)
+    result = Array{Float64}(undef, N, D)
 
     if D > length(directions) + 1
         error("Error in Sobol sequence: not enough dimensions")
@@ -98,4 +83,20 @@ function sobol_sequence(N::Int, D::Int)
     end
 
     return result
+end
+
+
+"""
+    index_of_least_significant_zero_bit(value::Int)
+
+Return the 1-indexed index of the least significant zero bit of `value`
+"""
+function index_of_least_significant_zero_bit(value::Int)
+    index = 2
+    while (value & 1) != 0
+        value >>= 1
+        index +=1
+    end
+
+    return index
 end

@@ -1,5 +1,6 @@
 using Distributions
 
+include("utils.jl")
 include("sobol_sequence.jl")
 
 #=
@@ -23,34 +24,6 @@ References
     [4] Saltelli, Andrea, et al. Global sensitivity analysis: the primer. 
         John Wiley & Sons, 2008.
 =#
-"""
-    SobolParams
-
-Implement a `SobolParams` type containing the `names` of the uncertain parameters
-of the problem, and the distributions `dists`, corresponding to each parameter.
-"""
-mutable struct SobolParams
-    names::AbstractArray{String, 1}
-    dists::AbstractArray{Distribution, 1}
-end
-
-"""
-    scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
-
-Rescale a Sobol `sequence` of parameters from the 0-to-1 range to the defined bounds
-of their distributions `dists`.  This function requires the parameters to have
-uniform distributions as of now.
-"""
-function scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
-    for dist in dists
-        if !(typeof(dist)  <: Uniform)
-            error("scale_params can only scale parameters with Uniform distributions")
-        end
-    end
-    sequence = sequence .* (repeat(scale.(dists), 2))' .+ (repeat(minimum.(dists), 2))'
-
-    return sequence
-end
 
 """
     saltelli_sample(params::SobolParams, N::Int)
@@ -77,7 +50,7 @@ function saltelli_sample(params::SobolParams, N::Int)
     index = 1
 
     # create the Saltelli sequence
-    saltelli_seq = zeros(N * (D + 2), D)
+    saltelli_seq = Array{Float64}(undef, N * (D + 2), D)
 
     for i in (numskip + 1): (N + numskip)
 
@@ -109,4 +82,22 @@ function saltelli_sample(params::SobolParams, N::Int)
 
     # return
     return saltelli_seq
+end
+
+"""
+    scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
+
+Rescale a Sobol `sequence` of parameters from the 0-to-1 range to the defined bounds
+of their distributions `dists`.  This function requires the parameters to have
+uniform distributions as of now.
+"""
+function scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
+    for dist in dists
+        if !(typeof(dist)  <: Uniform)
+            error("scale_params can only scale parameters with Uniform distributions")
+        end
+    end
+    sequence = sequence .* (repeat(scale.(dists), 2))' .+ (repeat(minimum.(dists), 2))'
+
+    return sequence
 end

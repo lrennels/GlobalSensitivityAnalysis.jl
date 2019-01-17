@@ -2,6 +2,7 @@ using Distributions
 
 include("sobol_sequence.jl")
 include("saltelli.jl")
+include("sobol_analysis.jl")
 include("test_functions/ishigami.jl")
 
 # define the (uncertain) parameters of the problem and their distributions
@@ -16,5 +17,8 @@ D = 3
 # generate samples using Sobol sequence
 param_values = saltelli_sample(params, N)
 
-# Run model (example)
+# run model (example)
 Y = ishigami(param_values)
+
+# perform Sobol Analysis
+results = sobol_analyze(params, Y)
