@@ -41,14 +41,8 @@ function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number
     # normalize model output
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
 
-    # separate the model_output into results from "A". "B" and "AB" 
-    A = model_output[1:stepsize:end]
-    B = model_output[stepsize:stepsize:end]
-    
-    AB = Array{Float64}(undef, N, D)
-    for i in 1:D
-        AB[:, i] = model_output[i+1:stepsize:end, :]
-    end
+    # separate the model_output into results from matrices "A". "B" and "AB" 
+    A, B, AB = split_output(model_output, N, D)
 
     # compute indicies and produce results
     firstorder = Array{Float64}(undef, D)
@@ -87,3 +81,22 @@ function total_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 
     return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))[1]
 end
 
+"""
+    split_output(model_output::AbstractArray{<:Number, 2}, N, D)
+
+Separate the `model_outputs` into matrices "A", "B", and "AB" for calculation of sensitvity 
+indices and return those three matrices.
+"""
+function split_output(model_output::AbstractArray{<:Number, 2}, N, D)
+    stepsize = D + 2
+
+    A = model_output[1:stepsize:end]
+    B = model_output[stepsize:stepsize:end]
+    
+    AB = Array{Float64}(undef, N, D)
+    for i in 1:D
+        AB[:, i] = model_output[i+1:stepsize:end, :]
+    end
+
+    return A, B, AB
+end

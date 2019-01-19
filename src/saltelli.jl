@@ -1,4 +1,5 @@
 using Distributions
+using Statistics 
 
 include("utils.jl")
 include("sobol_sequence.jl")
@@ -88,17 +89,22 @@ end
 """
     scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
 
-Rescale a Sobol `sequence` of parameters from the 0-to-1 range to the defined bounds
-of their distributions `dists`.  This function requires the parameters to have
-uniform distributions as of now.
+Rescale a Sobol `sequence` of parameters from the 0-to-1 range to their corresponding 
+univeariate distributions `dists`.  
 """
 function scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
-    for dist in dists
-        if !(typeof(dist)  <: Uniform)
-            error("scale_params can only scale parameters with Uniform distributions")
+
+    # could remove for loop and broadcast entire dists array, but creates difficulty with
+    # reading code due to mulitiple dimensions
+    for param in 1:length(dists)
+        dist = dists[param]
+
+        # TODO: why can't we use quantile for everything? (SALib has a case for uniform like below)
+        if (typeof(dist)  <: Uniform)
+            sequence[:, param] = sequence[:, param] .* scale(dist) .+ minimum(dist)
+        else
+            sequence[:, param] = quantile.(dist, sequence[:, sequence[:,param]])
         end
     end
-    sequence = sequence .* (repeat(scale.(dists), 2))' .+ (repeat(minimum.(dists), 2))'
-
     return sequence
 end
