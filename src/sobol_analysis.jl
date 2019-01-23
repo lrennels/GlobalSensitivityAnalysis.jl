@@ -36,7 +36,7 @@ function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number
 
     # define constants
     D = length(params.names)
-    N = Int(size(model_output, 1) / (D + 2))
+    N = params.num_samples
 
     # normalize model output
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
@@ -53,7 +53,7 @@ function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number
         totalorder[i] = total_order(A, AB[:, i], B)
     end
 
-    results = SobolResults(params, firstorder, totalorder)
+    results = SobolResults(params, firstorder, totalorder, N)
     
     return results
 
