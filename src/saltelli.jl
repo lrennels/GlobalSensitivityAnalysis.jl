@@ -88,12 +88,12 @@ function saltelli_sample(params::SobolParams)
 end
 
 """
-    scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
+    scale_sobol_seq(sequence::AbstractArray{<:Number, N}, dists::AbstractArray{Distribution, N})
 
 Rescale a Sobol `sequence` of parameters from the 0-to-1 range to their corresponding 
 univeariate distributions `dists`.  
 """
-function scale_sobol_seq(sequence::AbstractArray{<:Number, 2}, dists::AbstractArray{Distribution, 1})
+function scale_sobol_seq(sequence::AbstractArray{<:Number, N1}, dists::AbstractArray{Distribution, N2}) where N1 where N2
     D = length(dists) # number of parameters
     for param in 1:D
         dist = dists[param]

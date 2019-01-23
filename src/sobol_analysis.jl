@@ -23,7 +23,7 @@ References
 =#
 
 """
-    sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number, 2})
+    sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number, S})
 
 Performs a Sobol Analysis on the `model_output` produced using samples defined 
 by the parameters in `params` and returns a SobolResults struct holding the parameters
@@ -32,7 +32,7 @@ uncertain parameters.
 """
 # TODO - include second order effects
 # TODO - include groups
-function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number, 2})
+function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number, S}) where S
 
     # define constants
     D = length(params.names)
@@ -60,34 +60,34 @@ function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number
 end
 
 """
-    first_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 2}, B::AbstractArray{<:Number, 1})
+    first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N})
 
 Calculate the first order sensitivity indicies for model outputs given model outputs
 separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. [Saltelli et al., 
 2010 Table 2 eq (b)]
 """
-function first_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 1}, B::AbstractArray{<:Number, 1})
+function first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
     return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))[1]
 end
 
 """
-    total_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 2}, B::AbstractArray{<:Number, 1})
+    total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N})
 
 Calculate the total order sensitivity indicies for model outputs given model outputs
 separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. [Saltelli et al., 
 2010 Table 2 eq (f)].
 """
-function total_order(A::AbstractArray{<:Number, 1}, AB::AbstractArray{<:Number, 1}, B::AbstractArray{<:Number, 1})
+function total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
     return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))[1]
 end
 
 """
-    split_output(model_output::AbstractArray{<:Number, 2}, N, D)
+    split_output(model_output::AbstractArray{<:Number, S}, N, D)
 
 Separate the `model_outputs` into matrices "A", "B", and "AB" for calculation of sensitvity 
 indices and return those three matrices.
 """
-function split_output(model_output::AbstractArray{<:Number, 2}, N, D)
+function split_output(model_output::AbstractArray{<:Number, S}, N, D) where S
     stepsize = D + 2
 
     A = model_output[1:stepsize:end]
