@@ -5,6 +5,8 @@ Create a `SobolParams` type containing the `names` of the uncertain parameters
 of the problem, and the distributions `dists`, corresponding to each parameter, 
 and the `num_samples`.
 """
+# TBD: make the distributions/parameter names into a dictionary? array of tuples?
+# ... the idea being to keep the name tied to the distribution
 mutable struct SobolParams
     names::AbstractArray{String, N} where N
     dists::AbstractArray{Distribution, N} where N

@@ -82,6 +82,9 @@ function sobol_sequence(N::Int, D::Int)
         end
     end
 
+    # TBD: this is a quick fix for FP errors, should dig into it further
+    result[1,:] .= 0.
+
     return result
 end
 
