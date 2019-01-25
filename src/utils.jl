@@ -13,7 +13,7 @@ specific problem using Sobol Analysis:
 `N::Int = 1000`: the number of runs
 """
 mutable struct SobolPayload
-    params::Union{OrderedDict{Symbol, <:Any}, Nothing} # TODO: want {Symbol, <:Distribution}
+    params::Union{OrderedDict{Symbol, <:Any}, Nothing}
     calc_second_order::Bool
     N::Int 
 

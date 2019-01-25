@@ -33,8 +33,6 @@ a way to reduce the error rates in the resulting sensitivity index calculations.
 The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters 
 and `N` is the number of samples.
 """
-# TODO - include second order effects
-# TODO - include groups
 function sample(data::SobolPayload)
 
     # set number of values to skip from the initial sequence 
