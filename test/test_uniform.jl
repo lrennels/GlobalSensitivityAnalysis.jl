@@ -23,7 +23,6 @@ N = data.N
 D = length(data.params)
 
 # sampling
-julia_sobolseq = sobol_sequence(N, D) |> DataFrame 
 julia_samples = sample(data) |> DataFrame
 julia_ishigami = ishigami(convert(Matrix, julia_samples)) |> DataFrame
 
@@ -36,7 +35,6 @@ julia_results = analyze(data, convert( Matrix, julia_ishigami))
 ################################################################################
 
 # sampling
-py_sobolseq = load("data/py_uniform/py_sobolseq.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
 py_samples = load("data/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
 py_ishigami = load("data/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
 
@@ -52,7 +50,6 @@ py_totalorder = load("data/py_uniform/py_totalorder.csv", header_exists=false) |
 ################################################################################
 
 @testset "Uniform Sampling" begin
-    @test convert(Matrix, julia_sobolseq) ≈ convert(Matrix, py_sobolseq) atol = 1e-9
     @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = 1e-9
 end
 
