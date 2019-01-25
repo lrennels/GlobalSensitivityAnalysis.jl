@@ -12,8 +12,8 @@ include("../src/analyze_sobol.jl")
 include("../src/test_functions/ishigami.jl")
 
 # define the (uncertain) parameters of the problem and their distributions
-data = SobolData(
-    OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
+data = SobolPayload(
+    params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
         :x2 => Uniform(-3.14159265359, 3.14159265359),
         :x3 => Uniform(-3.14159265359, 3.14159265359)),
     N = 1000
@@ -29,7 +29,7 @@ julia_ishigami = ishigami(convert(Matrix, julia_samples)) |> DataFrame
 
 # analysis
 julia_A, julia_B, julia_AB = split_output(convert(Matrix, julia_ishigami), N, D)
-analyze!(data, convert( Matrix, julia_ishigami)) 
+julia_results = analyze(data, convert( Matrix, julia_ishigami)) 
 
 ################################################################################
 ## Python
@@ -61,6 +61,6 @@ end
     @test julia_A ≈ convert(Matrix, py_A) atol = 1e-9
     @test julia_B ≈ convert(Matrix, py_B) atol = 1e-9
     @test julia_AB ≈ convert(Matrix, py_AB) atol = 1e-9
-    @test data.results["firstorder"] ≈ convert(Matrix, py_firstorder) atol = 1e-9
-    @test data.results["totalorder"]≈ convert(Matrix, py_totalorder) atol = 1e-9
+    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = 1e-9
+    @test julia_results[:totalorder]≈ convert(Matrix, py_totalorder) atol = 1e-9
 end

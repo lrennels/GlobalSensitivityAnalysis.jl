@@ -3,24 +3,22 @@ using DataStructures
 using Statistics
 
 """
-    SobolData
+    SobolPayload
 
 A struct which holds all information needed for the sampling and analysis of a
 specific problem using Sobol Analysis:
 
-`params::OrderedDict{Symbol, <:Distribution} = Dict(): a dictionary mapping parameter names to their Distribution
+`params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing: a dictionary mapping parameter names to their Distribution
 `calc_second_order::Bool = false`: whether or not to calculate second order sensitivity indicies
 `N::Int = 1000`: the number of runs
-`results::Dict{} = Dict()`: the results of the sobol analysis
 """
-mutable struct SobolData
-    params::OrderedDict{Symbol, <:Distribution} # TODO: error here with non uniform ...
+mutable struct SobolPayload
+    params::Union{OrderedDict{Symbol, <:Any}, Nothing} # TODO: want {Symbol, <:Distribution}
     calc_second_order::Bool
     N::Int 
-    results::Dict{}
 
-    function SobolData(params::OrderedDict{Symbol, <:Distribution} = Dict(), calc_second_order::Bool = false, N::Int = 1000, results = Dict())
-        return new(params, calc_second_order, N, results)
+    function SobolPayload(;params= nothing, calc_second_order = false, N = 1000)
+        return new(params, calc_second_order, N)
     end
 end
 

@@ -12,8 +12,8 @@ include("../src/analyze_sobol.jl")
 include("../src/test_functions/ishigami.jl")
 
 # define the (uncertain) parameters of the problem and their distributions
-data = SobolData(
-    OrderedDict(:x1 => Normal(1, 0.2),
+data = SobolPayload(
+    params = OrderedDict(:x1 => Normal(1, 0.2),
         :x2 => Uniform(0.75, 1.25),
         :x3 => LogNormal(20, 4)),
     N = 100
@@ -33,7 +33,7 @@ julia_ishigami = ishigami(convert(Matrix, julia_samples)) |> DataFrame
 
 # analysis
 julia_A, julia_B, julia_AB = split_output(convert(Matrix, julia_ishigami), N, D)
-analyze!(data, convert( Matrix, julia_ishigami)) 
+julia_results = analyze(data, convert( Matrix, julia_ishigami)) 
 
 ################################################################################
 ## Python
@@ -61,6 +61,6 @@ py_totalorder = load("data/py_nonuniform/py_totalorder.csv", header_exists=false
 end
 
 @testset "Non-Uniform Analysis" begin
-    @test data.results["firstorder"] ≈ convert(Matrix, py_firstorder) atol = 1e-9
-    @test data.results["totalorder"]≈ convert(Matrix, py_totalorder) atol = 1e-9
+    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = 1e-9
+    @test julia_results[:totalorder]≈ convert(Matrix, py_totalorder) atol = 1e-9
 end

@@ -6,8 +6,8 @@ include("analyze_sobol.jl")
 include("test_functions/ishigami.jl")
 
 # define the data payload
-data = SobolData(
-    OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
+data = SobolPayload(
+    params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
         :x2 => Uniform(-3.14159265359, 3.14159265359),
         :x3 => Uniform(-3.14159265359, 3.14159265359)),
     N = 1000
@@ -20,4 +20,4 @@ samples = sample(data)
 Y = ishigami(samples)
 
 # perform Sobol Analysis
-analyze!(data, Y)
+analyze(data, Y)

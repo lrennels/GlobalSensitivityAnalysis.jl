@@ -5,7 +5,7 @@ using Distributions
 using Statistics
 
 export
-    SobolData, sobol_sequence, sample, analyze!, ishigami, split_output
+    sobol_sequence, sample, analyze, SobolPayload
     
 include("utils.jl")
 

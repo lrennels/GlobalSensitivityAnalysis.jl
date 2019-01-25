@@ -24,7 +24,7 @@ References
 =#
 
 """
-    sample(data::SobolData)
+    sample(data::SobolPayload)
 
 Generate a matrix containing the model inputs for Sobol sensitivity analysis with 
 the information in the `params` payload. In this function we apply Saltelli's 
@@ -35,7 +35,7 @@ and `N` is the number of samples.
 """
 # TODO - include second order effects
 # TODO - include groups
-function sample(data::SobolData)
+function sample(data::SobolPayload)
 
     # set number of values to skip from the initial sequence 
     numskip = 1000

@@ -23,16 +23,15 @@ References
 =#
 
 """
-    analyze!(params::SobolData, model_output::AbstractArray{<:Number, S})
+    analyze(params::SobolPayload, model_output::AbstractArray{<:Number, S})
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
-defined by the information in `data` and returns the same `params` struct with
-the `results` attribute now holding the results showing the sensitivity indicies 
-for each of the parameters.
+defined by the information in `data` and returns the a dictionary of results
+with the sensitivity indicies for each of the parameters.
 """
 # TODO - include second order effects
 # TODO - include groups
-function analyze!(data::SobolData, model_output::AbstractArray{<:Number, S}) where S
+function analyze(data::SobolPayload, model_output::AbstractArray{<:Number, S}) where S
 
     # define constants
     D = length(data.params) # number of uncertain parameters in problem
@@ -53,10 +52,9 @@ function analyze!(data::SobolData, model_output::AbstractArray{<:Number, S}) whe
         totalorder[i] = total_order(A, AB[:, i], B)
     end
 
-    data.results["firstorder"] = firstorder
-    data.results["totalorder"] = totalorder
+    results = Dict(:firstorder => firstorder, :totalorder => totalorder)
 
-    return data
+    return results
 end
 
 """
