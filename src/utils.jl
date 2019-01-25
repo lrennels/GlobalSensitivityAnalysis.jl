@@ -1,29 +1,45 @@
-"""
-    SobolParams(names::AbstractArray{String, N}, dists::AbstractArray{Distribution, N})
+using Distributions
+using DataStructures
+using Statistics
 
-Create a `SobolParams` type containing the `names` of the uncertain parameters
-of the problem, and the distributions `dists`, corresponding to each parameter, 
-and the `num_samples`.
 """
-# TBD: make the distributions/parameter names into a dictionary? array of tuples?
-# ... the idea being to keep the name tied to the distribution
-mutable struct SobolParams
-    names::AbstractArray{String, N} where N
-    dists::AbstractArray{Distribution, N} where N
-    num_samples::Int # commonly referred to as N in the documentation
+    SobolData
+
+A struct which holds all information needed for the sampling and analysis of a
+specific problem using Sobol Analysis:
+
+`params::Union{Dict{Symbol, <:Distribution, OrderedDict{Symbol, <:Distribution}}: a dictionary mapping parameter names to their Distribution
+`calc_second_order::Bool = false`: whether or not to calculate second order sensitivity indicies
+`N::Int = 1000`: the number of runs
+`results::Dict{} = nothing`: the results of the sobol analysis
+"""
+mutable struct SobolData
+    params::OrderedDict{Symbol, <:Distribution} #TODO this should be {Symbol, Any}
+    calc_second_order::Bool
+    N::Int 
+    results::Dict{}
+
+    function SobolData(params::OrderedDict{Symbol, <:Distribution}; calc_second_order::Bool = false, N::Int = 1000, results = Dict())
+        return new(params, calc_second_order, N, results)
+    end
+
 end
 
-"""
-    SobolResults(params::SobolParams, firstorder::AbstractArray{<:Number, N}, totalorder::AbstractArray{<:Number, N}, num_samples::Int)
 
-Create a `SobolResults` type containing the `names` of the uncertain parameters
-of the problem and the corresponding first order and total order sensitvity indicis 
-for each of the parameters, held in `firstorder` and `totalorder` respectively, 
-and the `num_samples`..
 """
-mutable struct SobolResults
-    params::SobolParams
-    firstorder::AbstractArray{<:Number, N} where N
-    totalorder::AbstractArray{<:Number, N} where N
-    num_samples::Int # commonly referred to as N in the documentation
+    scale_sobol_seq(sequence::AbstractArray{<:Number, N}, dists::AbstractArray{Distribution, N})
+
+Rescale a Sobol `sequence` of parameters from the 0-to-1 range to their corresponding 
+univeariate distributions `dists`.  
+"""
+function scale_sobol_seq(sequence::AbstractArray{<:Number, N1}, dists::AbstractArray{<:Distribution, N2}) where N1 where N2
+    D = length(dists) # number of parameters
+    for param in 1:D
+        dist = dists[param]
+        if !(typeof(dist) <: UnivariateDistribution)
+            error("Distribution must be a subtype of UnivariateDistribution")
+        end
+        sequence[:, [param, param + D]] = quantile.(dist, sequence[:, [param, param + D]])
+    end
+    return sequence
 end

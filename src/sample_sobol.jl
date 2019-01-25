@@ -1,5 +1,4 @@
 using Distributions
-using Statistics 
 
 include("utils.jl")
 include("sobol_sequence.jl")
@@ -25,27 +24,28 @@ References
 =#
 
 """
-    saltelli_sample(params::SobolParams)
+    sample(data::SobolData)
 
-Generate a matrix containing the model inputs for Sobol sensitivity analysis with `N` 
-samples and uncertain parameters described by `params`. We then apply Saltelli's 
+Generate a matrix containing the model inputs for Sobol sensitivity analysis with 
+the information in the `params` payload. In this function we apply Saltelli's 
 extension of the Sobol  sequence. Saltelli's scheme extends the Sobol sequence in 
 a way to reduce the error rates in the resulting sensitivity index calculations. 
-The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters. 
+The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters 
+and `N` is the number of samples.
 """
 # TODO - include second order effects
 # TODO - include groups
-function saltelli_sample(params::SobolParams)
+function sample(data::SobolData)
 
     # set number of values to skip from the initial sequence 
     numskip = 1000
 
     # constants 
-    D = length(params.names) # number of uncertain parameters in problem
-    N = params.num_samples # number of samples
+    D = length(data.params) # number of uncertain parameters in problem
+    N = data.N # number of samples
 
     base_seq = sobol_sequence(N + numskip, 2 * D)
-    base_seq = scale_sobol_seq(base_seq, params.dists) #scale
+    base_seq = scale_sobol_seq(base_seq, [values(data.params)...]) #scale
 
     index = 1
 
@@ -85,22 +85,4 @@ function saltelli_sample(params::SobolParams)
     end
 
     return saltelli_seq
-end
-
-"""
-    scale_sobol_seq(sequence::AbstractArray{<:Number, N}, dists::AbstractArray{Distribution, N})
-
-Rescale a Sobol `sequence` of parameters from the 0-to-1 range to their corresponding 
-univeariate distributions `dists`.  
-"""
-function scale_sobol_seq(sequence::AbstractArray{<:Number, N1}, dists::AbstractArray{Distribution, N2}) where N1 where N2
-    D = length(dists) # number of parameters
-    for param in 1:D
-        dist = dists[param]
-        if !(typeof(dist) <: UnivariateDistribution)
-            error("Distribution must be a subtype of UnivariateDistribution")
-        end
-        sequence[:, [param, param + D]] = quantile.(dist, sequence[:, [param, param + D]])
-    end
-    return sequence
 end

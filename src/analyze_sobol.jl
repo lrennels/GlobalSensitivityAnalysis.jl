@@ -23,20 +23,20 @@ References
 =#
 
 """
-    sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number, S})
+    analyze!(params::SobolData, model_output::AbstractArray{<:Number, S})
 
-Performs a Sobol Analysis on the `model_output` produced using samples defined 
-by the parameters in `params` and returns a SobolResults struct holding the parameters
-as well as the first order and total order sensitvity indicies for each of the
-uncertain parameters.
+Performs a Sobol Analysis on the `model_output` produced with the problem 
+defined by the information in `data` and returns the same `params` struct with
+the `results` attribute now holding the results showing the sensitivity indicies 
+for each of the parameters.
 """
 # TODO - include second order effects
 # TODO - include groups
-function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number, S}) where S
+function analyze!(data::SobolData, model_output::AbstractArray{<:Number, S}) where S
 
     # define constants
-    D = length(params.names)
-    N = params.num_samples
+    D = length(data.params) # number of uncertain parameters in problem
+    N = data.N # number of samples
 
     # normalize model output
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
@@ -53,10 +53,10 @@ function sobol_analyze(params::SobolParams, model_output::AbstractArray{<:Number
         totalorder[i] = total_order(A, AB[:, i], B)
     end
 
-    results = SobolResults(params, firstorder, totalorder, N)
-    
-    return results
+    data.results["firstorder"] = firstorder
+    data.results["totalorder"] = totalorder
 
+    return data
 end
 
 """
