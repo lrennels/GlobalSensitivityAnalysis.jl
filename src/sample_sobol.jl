@@ -1,7 +1,7 @@
 using Distributions
+import Sobol
 
 include("utils.jl")
-include("sobol_sequence.jl")
 
 #=
 Code adapted from: Herman, J. and Usher, W. (2017) SALib: An open-source Python 
@@ -42,8 +42,9 @@ function sample(data::SobolData)
     D = length(data.params) # number of uncertain parameters in problem
     N = data.N # number of samples
 
-    base_seq = sobol_sequence(N + numskip, 2 * D)
-    base_seq = scale_sobol_seq(base_seq, [values(data.params)...]) #scale
+    seq = Sobol.SobolSeq(2 * D)
+    base_seq = vcat(zeros(1, 2 * D), hcat([Sobol.next!(seq) for i = 1:N + numskip - 1]...)') # frist row must be zeros
+    base_seq = scale_sobol_seq(base_seq, [values(data.params)...]) # scale
 
     index = 1
 
