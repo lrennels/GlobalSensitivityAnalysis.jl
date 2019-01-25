@@ -5,8 +5,8 @@ include("sample_sobol.jl")
 include("analyze_sobol.jl")
 include("test_functions/ishigami.jl")
 
-# define the data payload
-data = SobolPayload(
+# define the data
+data = SobolData(
     params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
         :x2 => Uniform(-3.14159265359, 3.14159265359),
         :x3 => Uniform(-3.14159265359, 3.14159265359)),

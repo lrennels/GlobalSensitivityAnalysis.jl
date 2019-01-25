@@ -24,16 +24,16 @@ References
 =#
 
 """
-    sample(data::SobolPayload)
+    sample(data::SobolData)
 
 Generate a matrix containing the model inputs for Sobol sensitivity analysis with 
-the information in the `params` payload. In this function we apply Saltelli's 
+the information in the `data`. In this function we apply Saltelli's 
 extension of the Sobol  sequence. Saltelli's scheme extends the Sobol sequence in 
 a way to reduce the error rates in the resulting sensitivity index calculations. 
 The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters 
 and `N` is the number of samples.
 """
-function sample(data::SobolPayload)
+function sample(data::SobolData)
 
     # set number of values to skip from the initial sequence 
     numskip = 1000

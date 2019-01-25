@@ -12,7 +12,7 @@ include("../src/analyze_sobol.jl")
 include("../src/test_functions/ishigami.jl")
 
 # define the (uncertain) parameters of the problem and their distributions
-data = SobolPayload(
+data = SobolData(
     params = OrderedDict(:x1 => Normal(1, 0.2),
         :x2 => Uniform(0.75, 1.25),
         :x3 => LogNormal(20, 4)),
@@ -57,7 +57,7 @@ py_totalorder = load("data/py_nonuniform/py_totalorder.csv", header_exists=false
 
 @testset "Non-Uniform Sampling" begin
     @test convert(Matrix, julia_sobolseq) ≈ convert(Matrix, py_sobolseq) atol = 1e-9
-    @test convert(Matrix, julia_samples)[:, 2] ≈ convert(Matrix, py_samples)[:, 2] atol = 1e-9 # the uniform param
+    @test convert(Matrix, julia_samples)[:, 1:2] ≈ convert(Matrix, py_samples)[:, 1:2] atol = 1e-9 # lognormal is different
 end
 
 @testset "Non-Uniform Analysis" begin
