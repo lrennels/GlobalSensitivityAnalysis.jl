@@ -23,13 +23,13 @@ References
 =#
 
 """
-    analyze(params::SobolPayload, model_output::AbstractArray{<:Number, S})
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S})
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indicies for each of the parameters.
 """
-function analyze(data::SobolPayload, model_output::AbstractArray{<:Number, S}) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) where S
 
     # define constants
     D = length(data.params) # number of uncertain parameters in problem

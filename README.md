@@ -1,6 +1,6 @@
 # Sensitivity Analysis Library (SALib) in Julia
 
-A Julia package based on [SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements sensitivity analysis methods. The package currently includes the following methods:
+A Julia package based on [SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements global sensitivity analysis methods. The package currently includes the following methods:
 
 - Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
 

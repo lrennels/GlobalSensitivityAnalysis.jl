@@ -3,7 +3,7 @@ using DataStructures
 using Statistics
 
 """
-    SobolPayload
+    SobolData
 
 A struct which holds all information needed for the sampling and analysis of a
 specific problem using Sobol Analysis:
@@ -12,12 +12,12 @@ specific problem using Sobol Analysis:
 `calc_second_order::Bool = false`: whether or not to calculate second order sensitivity indicies
 `N::Int = 1000`: the number of runs
 """
-mutable struct SobolPayload
+mutable struct SobolData
     params::Union{OrderedDict{Symbol, <:Any}, Nothing}
     calc_second_order::Bool
     N::Int 
 
-    function SobolPayload(;params= nothing, calc_second_order = false, N = 1000)
+    function SobolData(;params= nothing, calc_second_order = false, N = 1000)
         return new(params, calc_second_order, N)
     end
 end

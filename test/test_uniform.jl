@@ -12,7 +12,7 @@ include("../src/analyze_sobol.jl")
 include("../src/test_functions/ishigami.jl")
 
 # define the (uncertain) parameters of the problem and their distributions
-data = SobolPayload(
+data = SobolData(
     params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
         :x2 => Uniform(-3.14159265359, 3.14159265359),
         :x3 => Uniform(-3.14159265359, 3.14159265359)),
