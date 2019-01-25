@@ -3,9 +3,10 @@ module SALib
 using DataStructures
 using Distributions
 using Statistics
+using Sobol
 
 export
-    sobol_sequence, sample, analyze, SobolData
+    sample, analyze
     
 include("utils.jl")
 
