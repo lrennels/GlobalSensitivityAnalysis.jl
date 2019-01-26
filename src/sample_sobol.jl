@@ -43,7 +43,8 @@ function sample(data::SobolData)
     N = data.N # number of samples
 
     seq = Sobol.SobolSeq(2 * D)
-    base_seq = vcat(zeros(1, 2 * D), hcat([Sobol.next!(seq) for i = 1:N + numskip - 1]...)') # frist row must be zeros
+    base_seq = hcat([Sobol.next!(seq) for i = 1:N + numskip - 1]...)' 
+    base_seq = base_seq[numskip:end, :] # SALIb includes first row of zeros, so skip one less
     base_seq = scale_sobol_seq(base_seq, [values(data.params)...]) # scale
 
     index = 1
@@ -55,7 +56,7 @@ function sample(data::SobolData)
     # j contains a first row from A_j, a last row B_j and D middle rows that form 
     # AB_j. [Saltelli et al., 2010 see Radial Sampling]
 
-    for i in (numskip + 1): (N + numskip)
+    for i in 1:N
 
         # copy matrix "A" (first row of each block)
         for j in 1:D
