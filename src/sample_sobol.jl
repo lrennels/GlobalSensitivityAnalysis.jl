@@ -38,7 +38,8 @@ function sample(data::SobolData)
     # set number of values to skip from the initial sequence 
     numskip = 1000
 
-    # constants 
+    # constants     
+    calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
     N = data.N # number of samples
 
@@ -47,14 +48,19 @@ function sample(data::SobolData)
     base_seq = base_seq[numskip:end, :] # SALIb includes first row of zeros, so skip one less
     base_seq = scale_sobol_seq(base_seq, [values(data.params)...]) # scale
 
-    index = 1
-
     # create the Saltelli sequence
-    saltelli_seq = Array{Float64}(undef, N * (D + 2), D)
+    if calc_second_order
+        saltelli_seq = Array{Float64}(undef, N * (2 * D + 2), D)
+    else
+        saltelli_seq = Array{Float64}(undef, N * (D + 2), D)
+    end
 
-    # The Saltelli sequence is made up of N blocks of (D + 2) rows, where each block
-    # j contains a first row from A_j, a last row B_j and D middle rows that form 
-    # AB_j. [Saltelli et al., 2010 see Radial Sampling]
+    # The Saltelli sequence is made up of N blocks of (D + 2) rows (if don't
+    # calculate second order), or (2 * D +2) rows (if do calculate second order)
+    #  where each block j contains a first row from A_j, a last row B_j and D 
+    # middle rows that form AB_j. [Saltelli et al., 2010 see Radial Sampling].  
+
+    index = 1
 
     for i in 1:N
 
@@ -65,7 +71,7 @@ function sample(data::SobolData)
         index += 1
 
         # for each parameter, place elements of "B" into "A" and insert those D rows
-        # of "AB" (middle rows of each block)
+        # of "AB" (top set of middle rows of each block)
         for k in 1:D
             for j in 1:D
                 if j == k
@@ -75,6 +81,22 @@ function sample(data::SobolData)
                 end
             end
             index += 1
+        end
+
+        # for each parameter, place elements of "A" into "B" and insert those D 
+        # rows of "BA" (bottom set of middle rows of each block) 
+        # Only needed if you're doing second-order indices 
+        if calc_second_order
+            for k in 1:D
+                for j in 1:D
+                    if j == k
+                        saltelli_seq[index, j] = base_seq[i, j]
+                    else
+                        saltelli_seq[index, j] = base_seq[i, j + D]
+                    end
+                end
+                index += 1
+            end
         end
 
         # copy matrix "B" (last row of each block)

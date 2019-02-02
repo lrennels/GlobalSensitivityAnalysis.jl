@@ -17,7 +17,7 @@ mutable struct SobolData
     calc_second_order::Bool
     N::Int 
 
-    function SobolData(;params= nothing, calc_second_order = false, N = 1000)
+    function SobolData(;params= nothing, calc_second_order = true, N = 1000)
         return new(params, calc_second_order, N)
     end
 end

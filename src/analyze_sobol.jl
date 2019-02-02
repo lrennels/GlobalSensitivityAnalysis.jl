@@ -32,6 +32,7 @@ with the sensitivity indicies for each of the parameters.
 function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) where S
 
     # define constants
+    calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
     N = data.N # number of samples
 
@@ -39,18 +40,30 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) wher
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
 
     # separate the model_output into results from matrices "A". "B" and "AB" 
-    A, B, AB = split_output(model_output, N, D)
+    A, B, AB, BA = split_output(model_output, N, D, calc_second_order)
 
     # compute indicies and produce results
     firstorder = Array{Float64}(undef, D)
     totalorder = Array{Float64}(undef, D)
+    if calc_second_order
+        secondorder =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
+    end
 
     for i in 1:D
         firstorder[i] = first_order(A, AB[:, i], B)
         totalorder[i] = total_order(A, AB[:, i], B)
+        if calc_second_order
+            for j in (i+1):D
+                secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)
+            end
+        end
     end
 
-    results = Dict(:firstorder => firstorder, :totalorder => totalorder)
+    if calc_second_order
+        results = Dict(:firstorder => firstorder, :secondorder => secondorder, :totalorder => totalorder)
+    else
+        results = Dict(:firstorder => firstorder, :totalorder => totalorder)
+    end
 
     return results
 end
@@ -67,6 +80,22 @@ function first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, 
 end
 
 """
+    second_order(A::AbstractArray{<:Number, N}, ABi::AbstractArray{<:Number, N}, ABj::AbstractArray{<:Number, N}, BAi::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
+
+Calculate the second order sensitivity index between two parameters for model outputs 
+given model outputs separated out into `A`, `AB`, `BA`, and `B` and normalize by 
+the variance of `[A B]`. [Saltelli et al. , 2002]
+"""
+function second_order(A::AbstractArray{<:Number, N}, ABi::AbstractArray{<:Number, N}, ABj::AbstractArray{<:Number, N}, BAi::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
+
+    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) / var(vcat(A, B), corrected = false))[1]
+    Si = first_order(A, ABi, B)
+    Sj = first_order(A, ABj, B)
+
+    return Vj .- Si .- Sj
+end
+
+"""
     total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N})
 
 Calculate the total order sensitivity indicies for model outputs given model outputs
@@ -78,21 +107,37 @@ function total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, 
 end
 
 """
-    split_output(model_output::AbstractArray{<:Number, S}, N, D)
+    split_output(model_output::AbstractArray{<:Number, S}, N, D, calc_second_order)
 
-Separate the `model_outputs` into matrices "A", "B", and "AB" for calculation of sensitvity 
-indices and return those three matrices.
+Separate the `model_outputs` into matrices "A", "B", "AB", and "BA" for calculation 
+of sensitvity indices and return those four matrices. If `calc_second_order` is 
+`False`, `BA` will be `nothing`.
 """
-function split_output(model_output::AbstractArray{<:Number, S}, N, D) where S
-    stepsize = D + 2
+function split_output(model_output::AbstractArray{<:Number, S}, N, D, calc_second_order::Bool) where S
+
+    if calc_second_order
+        stepsize = 2 * D + 2 
+    else
+        stepsize = D + 2
+    end
 
     A = model_output[1:stepsize:end]
     B = model_output[stepsize:stepsize:end]
     
+    #preallocate
     AB = Array{Float64}(undef, N, D)
-    for i in 1:D
-        AB[:, i] = model_output[i+1:stepsize:end, :]
+    if calc_second_order
+        BA = Array{Float64}(undef, N, D)
+    else
+        BA = nothing
     end
 
-    return A, B, AB
+    for i in 1:D
+        AB[:, i] = model_output[i+1:stepsize:end, :] 
+        if calc_second_order
+            BA[:, i] = model_output[i + D + 1:stepsize:end, :]
+        end
+    end
+
+    return A, B, AB, BA
 end
