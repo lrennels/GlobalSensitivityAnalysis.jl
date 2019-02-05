@@ -46,7 +46,7 @@ function sample(data::SobolData)
     seq = Sobol.SobolSeq(2 * D)
     base_seq = hcat([Sobol.next!(seq) for i = 1:N + numskip - 1]...)' 
     base_seq = base_seq[numskip:end, :] # SALIb includes first row of zeros, so skip one less
-    base_seq = scale_sobol_seq(base_seq, [values(data.params)...]) # scale
+    scale_sobol_seq!(base_seq, [values(data.params)...]) # scale
 
     # create the Saltelli sequence
     if calc_second_order
