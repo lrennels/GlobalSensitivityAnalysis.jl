@@ -24,12 +24,12 @@ end
 
 
 """
-    scale_sobol_seq(sequence::AbstractArray{<:Number, N}, dists::AbstractArray{Distribution, N})
+    scale_sobol_seq!(sequence::AbstractArray{<:Number, N}, dists::AbstractArray{Distribution, N})
 
 Rescale a Sobol `sequence` of parameters from the 0-to-1 range to their corresponding 
 univeariate distributions `dists`.  
 """
-function scale_sobol_seq(sequence::AbstractArray{<:Number, N1}, dists::AbstractArray{<:Distribution, N2}) where N1 where N2
+function scale_sobol_seq!(sequence::AbstractArray{<:Number, N1}, dists::AbstractArray{<:Distribution, N2}) where N1 where N2
     D = length(dists) # number of parameters
     for param in 1:D
         dist = dists[param]
@@ -38,5 +38,4 @@ function scale_sobol_seq(sequence::AbstractArray{<:Number, N1}, dists::AbstractA
         end
         sequence[:, [param, param + D]] = quantile.(dist, sequence[:, [param, param + D]])
     end
-    return sequence
 end

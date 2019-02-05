@@ -7,5 +7,5 @@ using Test
 end
 
 @testset "Unit Testing" begin
-    include("test_units.jl")
+    include("unit_tests.jl")
 end
