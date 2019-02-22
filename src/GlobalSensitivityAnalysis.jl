@@ -7,14 +7,11 @@ using Sobol
 
 export
     sample, analyze
-    
-include("utils.jl")
 
-# After loading types, the rest can just be alphabetical
-include("analyze_sobol.jl")
-include("directions.jl")
+include("utils.jl")
 include("sample_sobol.jl")
-include("sobol_sequence.jl")
+include("analyze_sobol.jl")
+# include("sobol_sequence.jl") # removed because we are using Sobol.jl for now
 include("test_functions/ishigami.jl")
 
 end # module
