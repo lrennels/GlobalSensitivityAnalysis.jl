@@ -4,9 +4,6 @@ import Sobol
 include("utils.jl")
 
 #=
-Code adapted from: Herman, J. and Usher, W. (2017) SALib: An open-source Python 
-library for sensitivity analysis. Journal of Open Source Software, 2(9)
-
 References
 ----------
     [1] Sobol, I. M. (2001).  "Global sensitivity indices for nonlinear
