@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/lrennels/GlobalSensitivityAnalysis.jl.svg?branch=master)](https://travis-ci.org/lrennels/GlobalSensitivityAnalysis.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/github/lrennels/GlobalSensitivityAnalysis.jl?branch=master&?svg=true)](https://ci.appveyor.com/project/lrennels/GlobalSensitivityAnalysis.jl/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/lrennels/GlobalSensitivityAnalysis.jl?branch=master&?svg=true)](https://ci.appveyor.com/project/lrennels/globalsensitivityanalysis-jl.jl/branch/master)
 [![codecov](https://codecov.io/gh/lrennels/GlobalSensitivityAnalysis.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/lrennels/GlobalSensitivityAnalysis.jl)
 [![Coverage Status](https://img.shields.io/coveralls/github/lrennels/GlobalSensitivityAnalysis.jl/master.svg)](https://coveralls.io/github/lrennels/GlobalSensitivityAnalysis.jl?branch=master)
 
