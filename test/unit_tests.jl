@@ -4,7 +4,7 @@ using Distributions
 include("../src/utils.jl")
 include("../src/sobol_sequence.jl")
 include("../src/sample_sobol.jl")
-include("../src/test_functions/Ishigami.jl")
+include("../src/test_functions/ishigami.jl")
 include("../src/analyze_sobol.jl")
 
 ##
