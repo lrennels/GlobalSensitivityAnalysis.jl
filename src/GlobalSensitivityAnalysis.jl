@@ -1,4 +1,4 @@
-module SALib
+module GlobalSensitivityAnalysis
 
 using DataStructures
 using Distributions
