@@ -6,7 +6,7 @@ using Statistics
 using Sobol
 
 export
-    sample, analyze
+    sample, analyze, SobolData
 
 include("utils.jl")
 include("sample_sobol.jl")
