@@ -22,7 +22,7 @@ References
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
-with the sensitivity indicies for each of the parameters.
+with the sensitivity indices for each of the parameters.
 """
 function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) where S
 
@@ -37,7 +37,7 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) wher
     # separate the model_output into results from matrices "A". "B" and "AB" 
     A, B, AB, BA = split_output(model_output, N, D, calc_second_order)
 
-    # compute indicies and produce results
+    # compute indices and produce results
     firstorder = Array{Float64}(undef, D)
     totalorder = Array{Float64}(undef, D)
     if calc_second_order
@@ -66,7 +66,7 @@ end
 """
     first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N})
 
-Calculate the first order sensitivity indicies for model outputs given model outputs
+Calculate the first order sensitivity indices for model outputs given model outputs
 separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. [Saltelli et al., 
 2010 Table 2 eq (b)]
 """
@@ -93,7 +93,7 @@ end
 """
     total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N})
 
-Calculate the total order sensitivity indicies for model outputs given model outputs
+Calculate the total order sensitivity indices for model outputs given model outputs
 separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. [Saltelli et al., 
 2010 Table 2 eq (f)].
 """
