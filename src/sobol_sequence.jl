@@ -29,7 +29,7 @@ function sobol_sequence(N::Int, D::Int)
 
     # Generate (N x D) numpy array of Sobol sequence samples
     scale = 31
-    result = Array{Float64}(undef, N, D)
+    result = zeros(N, D)
 
     if D > length(directions) + 1
         error("Error in Sobol sequence: not enough dimensions")
@@ -41,7 +41,7 @@ function sobol_sequence(N::Int, D::Int)
     end
 
     for i in 1:D
-        V = zeros(Int, L+1)
+        V = zeros(UInt64, L+1)
 
         if i == 1
             for j in 2:L+1
@@ -72,15 +72,12 @@ function sobol_sequence(N::Int, D::Int)
             end
         end
 
-        X = Int(0)
+        X = UInt64(0)
         for j in 2:N
             X = xor(X, V[index_of_least_significant_zero_bit((j-1) - 1)])
             result[j,i] = Float64(X / (2 ^ scale))
         end
     end
-
-    # TBD: this is a quick fix for FP errors, should dig into it further
-    result[1,:] .= 0.
 
     return result
 end
