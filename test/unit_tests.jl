@@ -2,7 +2,6 @@ using Test
 using Distributions
 
 include("../src/utils.jl")
-include("../src/sobol_sequence.jl")
 include("../src/sample_sobol.jl")
 include("../src/test_functions/ishigami.jl")
 include("../src/analyze_sobol.jl")
@@ -46,26 +45,7 @@ scale_sobol_seq!(seq, dists)
 @test seq != original_seq
 
 ##
-## 2. Sobol Sequence
-##
-
-for N in convert.(Int, ceil.(10 * rand(10)))
-    for D in convert.(Int, ceil.(10 * rand(10)))
-        seq = sobol_sequence(N, D)
-        @test size(seq) == (N, D)
-    end
-end
-
-goodVal = 3
-negVal = -1
-nonIntVal = 1.1
-@test_throws ErrorException sobol_sequence(negVal, goodVal) # no negatives
-@test_throws ErrorException sobol_sequence(goodVal, negVal) # no negatives
-@test_throws MethodError sobol_sequence(nonIntVal, goodVal) # no non-Ints
-@test_throws MethodError sobol_sequence(goodVal, nonIntVal) # no non-Ints
-
-##
-## 3. Sample Sobol
+## 2. Sample Sobol
 ##
 
 samples = sample(data1)

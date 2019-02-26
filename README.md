@@ -125,19 +125,3 @@ Some of the code in this package is derivative code based on the work of John He
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
-
-The code in `sobol_sequence.jl` is derivative code based on `SALib` as mentioned above, although this particular section of `SALib` was in turn derived from Kuo and Joe:
-
-    Copyright (c) 2008, Frances Y. Kuo and Stephen Joe
-    All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are
-    met:
-
-    Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
