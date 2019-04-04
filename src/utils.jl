@@ -33,6 +33,11 @@ function scale_sobol_seq!(sequence::AbstractArray{<:Number, N1}, dists::Abstract
     D = length(dists) # number of parameters
     for param in 1:D
         dist = dists[param]
-        sequence[:, [param, param + D]] = quantile.(dist, sequence[:, [param, param + D]])
+        if typeof(dist) <: UnivariateDistribution
+            sequence[:, [param, param + D]] = quantile.(dist, sequence[:, [param, param + D]])
+        # temporary fix to problem calling quantile. on a EmpiricalDistribution from Mimi
+        else
+            sequence[:, [param, param + D]] = quantile(dist, sequence[:, [param, param + D]])
+        end
     end
 end
