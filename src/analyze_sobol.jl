@@ -33,8 +33,8 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
     calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
     N = data.N # number of samples
-    isnothing(conf_level) ? conf_level = data.conf_level : nothing
-    isnothing(num_resamples) ? num_resamples = data.num_resamples : nothing # resamples for CI
+    conf_level === nothing ? conf_level = data.conf_level : nothing
+    num_resamples === nothing ? num_resamples = data.num_resamples : nothing # resamples for CI
     
     # values for CI calculations
     r = rand(1:N, N, num_resamples)
