@@ -85,8 +85,14 @@ results1 = analyze(data1, Y1)
 for Si in results1[:firstorder]
     @test Si <= 1
 end
+for CI in results1[:firstorder_conf]
+    @test CI > 0 
+end
 for St in results1[:totalorder]
     @test St <= 1
+end
+for CI in results1[:totalorder_conf]
+    @test CI > 0 
 end
 @test sum(results1[:totalorder]) > sum(results1[:firstorder])
 
@@ -95,10 +101,19 @@ results3 = analyze(data3, Y3)
 for Si in results3[:firstorder]
     @test Si <= 1
 end
+for CI in results3[:firstorder_conf]
+    @test ismissing(CI) || CI > 0
+end
 for S2i in results3[:secondorder]
     @test ismissing(S2i) || S2i <= 1
 end
+for CI in results3[:secondorder_conf]
+    @test ismissing(CI) || CI > 0
+end
 for St in results3[:totalorder]
     @test St <= 1
+end
+for CI in results3[:totalorder_conf]
+    @test ismissing(CI) || CI > 0
 end
 @test sum(results3[:totalorder]) > sum(results3[:firstorder])

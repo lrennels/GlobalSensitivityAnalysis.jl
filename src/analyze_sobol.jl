@@ -37,7 +37,7 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
     isnothing(num_resamples) ? num_resamples = data.num_resamples : nothing # resamples for CI
     
     # values for CI calculations
-    r = rand(1:100, N, num_resamples)
+    r = rand(1:N, N, num_resamples)
     Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
 
     # normalize model output
@@ -59,15 +59,15 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
     end
 
     for i in 1:D
-        firstorder[i] = first_order(A, AB[:, i], B)
+        firstorder[i] = first_order(A, AB[:, i], B)[1] # array to scalar with [1]
         firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r])) # TODO ddof = 0
 
-        totalorder[i] = total_order(A, AB[:, i], B)
+        totalorder[i] = total_order(A, AB[:, i], B)[1] # array to scalar with [1]
         totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r])) # TODO ddof = 0
 
         if calc_second_order
             for j in (i+1):D
-                secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)
+                secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)[1] # array to scalar with [1]
                 secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r]))) # TODO ddof = 0
             end
         end
@@ -104,7 +104,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (b)]
 """
 function first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))[1]
+    return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))
 end
 
 """
@@ -116,7 +116,7 @@ the variance of `[A B]`. [Saltelli et al. , 2002]
 """
 function second_order(A::AbstractArray{<:Number, N}, ABi::AbstractArray{<:Number, N}, ABj::AbstractArray{<:Number, N}, BAi::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
 
-    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) / var(vcat(A, B), corrected = false))[1]
+    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) / var(vcat(A, B), corrected = false))
     Si = first_order(A, ABi, B)
     Sj = first_order(A, ABj, B)
 
@@ -131,7 +131,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (f)].
 """
 function total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))[1]
+    return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))
 end
 
 """
