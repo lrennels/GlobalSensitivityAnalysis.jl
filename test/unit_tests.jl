@@ -18,31 +18,23 @@ parameters = OrderedDict(
     :param2 => LogNormal(5, 20),
     :param3 => TriangularDist(0, 4, 1)
 )
-num_resamples = 50
-conf_level = 0.99
 
-data1 = SobolData(params = parameters, calc_second_order = calc_second_order, N = N, num_resamples = 50, conf_level = 0.99)
+data1 = SobolData(params = parameters, calc_second_order = calc_second_order, N = N)
 @test data1.params[:param1] == parameters[:param1]
 @test data1.params[:param2] == parameters[:param2]
 @test data1.params[:param2] == parameters[:param2]
 @test data1.params[:param3] == parameters[:param3]
 @test data1.N == N
 @test data1.calc_second_order == calc_second_order
-@test data1.conf_level == 0.99
-@test data1.num_resamples == 50
 
 data2 = SobolData()
 @test data2.params == nothing
 @test data2.N == 1000
 @test data2.calc_second_order == true
-@test data2.conf_level == 0.95
-@test data2.num_resamples == 100
 
 data3 = SobolData(params = parameters)
 data4 = SobolData(calc_second_order = false)
 data5 = SobolData(N = 100)
-data6 = SobolData(num_resamples = 100)
-data7 = SobolData(conf_level) = 0.95
 
 # scale_sobol_seq!
 seq = rand(100, 8)

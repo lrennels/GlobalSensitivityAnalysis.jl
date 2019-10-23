@@ -19,23 +19,20 @@ References
 =#
 
 """
-analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Int, Nothing} = nothing, conf_level::Union{<:Number, Nothing} = nothing)
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 100, conf_level::Number = 0.95) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
-parameters. If `num_resamples` and `conf_level` are defined, they will override
-the default values set in `data`.
+parameters defined using the `num_resamples` and `conf_level` keyword args.
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Int, Nothing} = nothing, conf_level::Union{<:Number, Nothing} = nothing) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 100, conf_level::Number = 0.95) where S
 
     # define constants
     calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
     N = data.N # number of samples
-    conf_level === nothing ? conf_level = data.conf_level : nothing
-    num_resamples === nothing ? num_resamples = data.num_resamples : nothing # resamples for CI
-    
+
     # values for CI calculations
     r = rand(1:N, N, num_resamples)
     Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
