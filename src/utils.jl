@@ -11,14 +11,18 @@ specific problem using Sobol Analysis:
 `params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
 `calc_second_order::Bool = false`: whether or not to calculate second order sensitivity indices
 `N::Int = 1000`: the number of runs
+`conf_level = 0.95`: the confidence level for calculation of CIs
+`num_resamples::Int = 100`: the number of resamples for calculation of CIs
 """
 mutable struct SobolData
     params::Union{OrderedDict{Symbol, <:Any}, Nothing}
     calc_second_order::Bool
     N::Int 
+    conf_level::Number
+    num_resamples::Int
 
-    function SobolData(;params= nothing, calc_second_order = true, N = 1000)
-        return new(params, calc_second_order, N)
+    function SobolData(;params= nothing, calc_second_order = true, N = 1000, conf_level = 0.95, num_resamples = 100)
+        return new(params, calc_second_order, N, conf_level, num_resamples)
     end
 end
 

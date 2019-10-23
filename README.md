@@ -30,7 +30,7 @@ The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parame
 and `N` is the number of samples.
 ```
 
-The single argument to this function is of type `SobolData`, a custom type designed to hold all information needed for sampling and analysis. A `SobolData` struct is parameterized by a `params` dictionary (NOTE that this must be an `OrderedDict`, not a `Dict`) which maps parameter names to their Distributions, `calc_second_order` determining whether or not to calculate second-order sensitivity indices, and `N`, the desired number of runs.
+The single argument to this function is of type `SobolData`, a custom type designed to hold all information needed for sampling and analysis. A `SobolData` struct is parameterized by a `params` dictionary (NOTE that this must be an `OrderedDict`, not a `Dict`) which maps parameter names to their Distributions, `calc_second_order` determining whether or not to calculate second-order sensitivity indices, the desired number of runs `N`, and the number of resamples and confidence interval, `num_resamples` and `conf_level` respectively, for the calcuation of confidence intervals of the sensitivity indices.
 
 ```julia
     SobolData
@@ -41,16 +41,20 @@ specific problem using Sobol Analysis:
 `params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
 `calc_second_order::Bool = false`: whether or not to calculate second order sensitivity indices
 `N::Int = 1000`: the number of runs
+`conf_level = 0.95`: the confidence level for calculation of CIs
+`num_resamples::Int = 100`: the number of resamples for calculation of CIs
 ```
 
 After sampling with `sample`, use the resulting of matrix of parameter combinations to run your model, producing a vector of results.  The next and final step is to analyze the results with your `model_output` using the `analyze` function with the signature below. This function takes the same `SobolData` as `sample`, as well as the `model_output` vector and produces a dictionary of results.  This dictionary will include the `:firstorder`, `:totalorder`, and (optionally) `:secondorder` indices for each parameter.
 
 ```julia
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S})
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Int, Nothing} = nothing, conf_level::Union{Number, Nothing} = nothing)
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
-with the sensitivity indices for each of the parameters.
+with the sensitivity indices and respective confidence intervals for each of the
+parameters. If `num_resamples` and `conf_level` are defined, they will override 
+the default values set in `data`.
 ```
 
 An example of the basic flow can be found in `src/main.jl` using the Ishigami test function in `src/test_functions/ishigami.jl`, and is copied and commented below for convenience.

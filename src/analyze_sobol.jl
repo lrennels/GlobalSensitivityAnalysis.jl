@@ -1,4 +1,5 @@
 using Statistics
+using Distributions
 
 #=
 References
@@ -18,18 +19,26 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S})
+analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Int, Nothing} = nothing, conf_level::Union{<:Number, Nothing} = nothing)
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
-with the sensitivity indices for each of the parameters.
+with the sensitivity indices and respective confidence intervals for each of the
+parameters. If `num_resamples` and `conf_level` are defined, they will override
+the default values set in `data`.
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Int, Nothing} = nothing, conf_level::Union{<:Number, Nothing} = nothing) where S
 
     # define constants
     calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
     N = data.N # number of samples
+    isnothing(conf_level) ? conf_level = data.conf_level : nothing
+    isnothing(num_resamples) ? num_resamples = data.num_resamples : nothing # resamples for CI
+    
+    # values for CI calculations
+    r = rand(1:100, N, num_resamples)
+    Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
 
     # normalize model output
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
@@ -39,26 +48,50 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) wher
 
     # compute indices and produce results
     firstorder = Array{Float64}(undef, D)
+    firstorder_conf = Array{Float64}(undef, D)
+
     totalorder = Array{Float64}(undef, D)
+    totalorder_conf = Array{Float64}(undef, D)
+
     if calc_second_order
         secondorder =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
+        secondorder_conf =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
     end
 
     for i in 1:D
         firstorder[i] = first_order(A, AB[:, i], B)
+        firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r])) # TODO ddof = 0
+
         totalorder[i] = total_order(A, AB[:, i], B)
+        totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r])) # TODO ddof = 0
+
         if calc_second_order
             for j in (i+1):D
                 secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)
+                secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r]))) # TODO ddof = 0
             end
         end
     end
 
+    # TODO - clean this up to remove repetition 
     if calc_second_order
-        results = Dict(:firstorder => firstorder, :secondorder => secondorder, :totalorder => totalorder)
-    else
-        results = Dict(:firstorder => firstorder, :totalorder => totalorder)
+        results = Dict(
+            :firstorder         => firstorder,
+            :firstorder_conf    => firstorder_conf,
+            :totalorder         => totalorder,
+            :totalorder_conf    => totalorder_conf,
+            :secondorder        => secondorder,
+            :secondorder_conf   => secondorder_conf
+        )
+    else 
+        results = Dict(
+            :firstorder         => firstorder,
+            :firstorder_conf    => firstorder_conf,
+            :totalorder         => totalorder,
+            :totalorder_conf    => totalorder_conf
+        )
     end
+
 
     return results
 end
