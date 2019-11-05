@@ -85,14 +85,6 @@ end
         end
     end
 
-    # # TODO tolerance for CI comparisons ... all these failing ... but might be because this is 
-    # # a nonsensical set of distributions
-    # @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = 1e-1
-    # @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = 1e-1
+    # TODO CI comparisons
 
-    # for i = 1:D
-    #     for j = i+1:D
-    #         @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = 1e-1
-    #     end
-    # end
 end

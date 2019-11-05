@@ -26,7 +26,7 @@ defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
 parameters defined using the `num_resamples` and `conf_level` keyword args.
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 100, conf_level::Number = 0.95) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95) where S
 
     # define constants
     calc_second_order = data.calc_second_order 
@@ -57,20 +57,19 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
 
     for i in 1:D
         firstorder[i] = first_order(A, AB[:, i], B)[1] # array to scalar with [1]
-        firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r])) # TODO ddof = 0
+        firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r]))
 
         totalorder[i] = total_order(A, AB[:, i], B)[1] # array to scalar with [1]
-        totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r])) # TODO ddof = 0
+        totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r]))
 
         if calc_second_order
             for j in (i+1):D
                 secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)[1] # array to scalar with [1]
-                secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r]))) # TODO ddof = 0
+                secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r])))
             end
         end
     end
 
-    # TODO - clean this up to remove repetition 
     if calc_second_order
         results = Dict(
             :firstorder         => firstorder,
