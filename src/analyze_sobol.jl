@@ -1,4 +1,5 @@
 using Statistics
+using Distributions
 
 #=
 References
@@ -18,18 +19,23 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S})
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
-with the sensitivity indices for each of the parameters.
+with the sensitivity indices and respective confidence intervals for each of the
+parameters defined using the `num_resamples` and `conf_level` keyword args.
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95) where S
 
     # define constants
     calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
     N = data.N # number of samples
+
+    # values for CI calculations
+    r = rand(1:N, N, num_resamples)
+    Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
 
     # normalize model output
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
@@ -39,26 +45,49 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}) wher
 
     # compute indices and produce results
     firstorder = Array{Float64}(undef, D)
+    firstorder_conf = Array{Float64}(undef, D)
+
     totalorder = Array{Float64}(undef, D)
+    totalorder_conf = Array{Float64}(undef, D)
+
     if calc_second_order
         secondorder =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
+        secondorder_conf =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
     end
 
     for i in 1:D
-        firstorder[i] = first_order(A, AB[:, i], B)
-        totalorder[i] = total_order(A, AB[:, i], B)
+        firstorder[i] = first_order(A, AB[:, i], B)[1] # array to scalar with [1]
+        firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r]))
+
+        totalorder[i] = total_order(A, AB[:, i], B)[1] # array to scalar with [1]
+        totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r]))
+
         if calc_second_order
             for j in (i+1):D
-                secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)
+                secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)[1] # array to scalar with [1]
+                secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r])))
             end
         end
     end
 
     if calc_second_order
-        results = Dict(:firstorder => firstorder, :secondorder => secondorder, :totalorder => totalorder)
-    else
-        results = Dict(:firstorder => firstorder, :totalorder => totalorder)
+        results = Dict(
+            :firstorder         => firstorder,
+            :firstorder_conf    => firstorder_conf,
+            :totalorder         => totalorder,
+            :totalorder_conf    => totalorder_conf,
+            :secondorder        => secondorder,
+            :secondorder_conf   => secondorder_conf
+        )
+    else 
+        results = Dict(
+            :firstorder         => firstorder,
+            :firstorder_conf    => firstorder_conf,
+            :totalorder         => totalorder,
+            :totalorder_conf    => totalorder_conf
+        )
     end
+
 
     return results
 end
@@ -71,7 +100,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (b)]
 """
 function first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))[1]
+    return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))
 end
 
 """
@@ -83,7 +112,7 @@ the variance of `[A B]`. [Saltelli et al. , 2002]
 """
 function second_order(A::AbstractArray{<:Number, N}, ABi::AbstractArray{<:Number, N}, ABj::AbstractArray{<:Number, N}, BAi::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
 
-    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) / var(vcat(A, B), corrected = false))[1]
+    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) / var(vcat(A, B), corrected = false))
     Si = first_order(A, ABi, B)
     Sj = first_order(A, ABj, B)
 
@@ -98,7 +127,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (f)].
 """
 function total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))[1]
+    return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))
 end
 
 """

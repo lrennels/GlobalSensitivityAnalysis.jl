@@ -30,6 +30,11 @@ and `N` is the number of samples.
 """
 function sample(data::SobolData)
 
+    # check for parameters
+    if data.params === nothing
+        error("Cannot sample to generate model inputs because there are no parameters")
+    end
+
     # set number of values to skip from the initial sequence 
     numskip = 1000
 

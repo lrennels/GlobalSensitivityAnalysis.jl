@@ -7,6 +7,7 @@ using DataStructures
 ################################################################################
 ## JULIA
 ################################################################################
+include("../src/utils.jl")
 include("../src/sample_sobol.jl")
 include("../src/analyze_sobol.jl")
 include("../src/test_functions/ishigami.jl")
@@ -28,7 +29,7 @@ julia_ishigami = ishigami(convert(Matrix, julia_samples)) |> DataFrame
 
 # analysis
 julia_A, julia_B, julia_AB, julia_BA = split_output(convert(Matrix, julia_ishigami), N, D, data.calc_second_order)
-julia_results = analyze(data, convert(Matrix, julia_ishigami)) 
+julia_results = analyze(data, convert(Matrix, julia_ishigami); num_resamples = 1_000) 
 
 ################################################################################
 ## Python
@@ -43,9 +44,14 @@ py_A = load("data/py_uniform/py_A.csv", header_exists=false) |> DataFrame
 py_B = load("data/py_uniform/py_B.csv", header_exists=false) |> DataFrame
 py_AB = load("data/py_uniform/py_AB.csv", header_exists=false) |> DataFrame
 py_BA = load("data/py_uniform/py_BA.csv", header_exists=false) |> DataFrame
+
 py_firstorder = load("data/py_uniform/py_firstorder.csv", header_exists=false) |> DataFrame
 py_secondorder = load("data/py_uniform/py_secondorder.csv", header_exists=false) |> DataFrame
 py_totalorder = load("data/py_uniform/py_totalorder.csv", header_exists=false) |> DataFrame
+
+py_firstorder_conf = load("data/py_uniform/py_firstorder_conf.csv", header_exists=false) |> DataFrame
+py_secondorder_conf = load("data/py_uniform/py_secondorder_conf.csv", header_exists=false) |> DataFrame
+py_totalorder_conf = load("data/py_uniform/py_totalorder_conf.csv", header_exists=false) |> DataFrame
 
 ################################################################################
 ## Testing
@@ -67,6 +73,16 @@ end
     for i = 1:D
         for j = i+1:D
             @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = 1e-9
+        end
+    end
+
+    # TODO Choose proper tolerance for CI comparison
+    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = 1e-2
+    @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = 1e-1
+
+    for i = 1:D
+        for j = i+1:D
+            @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = 1e-3
         end
     end
 end
