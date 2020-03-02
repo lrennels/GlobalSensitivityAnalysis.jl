@@ -1,5 +1,6 @@
 using Statistics
 using Distributions
+using ProgressMeter
 
 #=
 References
@@ -55,7 +56,15 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
         secondorder_conf =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
     end
 
+    # set up ProgressMeter
+    counter = 0
+    p = Progress(D, counter, "Calculating indices for $D parameters ...")
+
     for i in 1:D
+
+        counter += 1
+        ProgressMeter.update!(p, counter)      
+
         firstorder[i] = first_order(A, AB[:, i], B)[1] # array to scalar with [1]
         firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r]))
 
