@@ -24,7 +24,7 @@ References
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
-parameters defined using the `num_resamples` and `conf_level` keyword args.
+parameters defined using the `num_resamples` and `conf_level` keyword args. 
 """
 function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95) where S
 

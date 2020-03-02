@@ -46,7 +46,7 @@ specific problem using Sobol Analysis:
 After sampling with `sample`, use the resulting of matrix of parameter combinations to run your model, producing a vector of results.  The next and final step is to analyze the results with your `model_output` using the `analyze` function with the signature below. This function takes the same `SobolData` as `sample`, as well as the `model_output` vector and produces a dictionary of results.  This dictionary will include the `:firstorder`, `:totalorder`, and (optionally) `:secondorder` indices for each parameter.
 
 ```julia
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Int, Nothing} = 10_000, conf_level::Union{Number, Nothing} = 0.95)
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95)
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
