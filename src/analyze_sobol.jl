@@ -20,14 +20,25 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95) where S
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
-parameters defined using the `num_resamples` and `conf_level` keyword args. 
+parameters defined using the `num_resamples` and `conf_level` keyword args. If these
+are Nothing than no confidence intervals will be calculated.
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95) where S
+
+    # handle confidence interval flag
+    num_nothings = isnothing(num_resamples) + isnothing(conf_level)
+    if num_nothings == 1
+        error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
+    elseif num_nothings == 2
+        conf_flag = false
+    else
+        conf_flag = true
+    end
 
     # define constants
     calc_second_order = data.calc_second_order 
@@ -44,60 +55,77 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
     # separate the model_output into results from matrices "A". "B" and "AB" 
     A, B, AB, BA = split_output(model_output, N, D, calc_second_order)
 
-    # compute indices and produce results
+    # preallocate arrays for indices
     firstorder = Array{Float64}(undef, D)
-    firstorder_conf = Array{Float64}(undef, D)
-
     totalorder = Array{Float64}(undef, D)
-    totalorder_conf = Array{Float64}(undef, D)
+    calc_second_order ? secondorder =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing) : nothing
 
-    if calc_second_order
-        secondorder =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
-        secondorder_conf =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing)
+    # preallocate arrays for confidence intervals
+    if conf_flag
+        firstorder_conf = Array{Float64}(undef, D)
+        totalorder_conf = Array{Float64}(undef, D)
+        calc_second_order ? secondorder_conf =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing) : nothing
     end
 
-    # set up ProgressMeter
+    # set up progress meter
     counter = 0
     p = Progress(D, counter, "Calculating indices for $D parameters ...")
 
     for i in 1:D
 
+        # increment progress meter
         counter += 1
         ProgressMeter.update!(p, counter)      
-
+        
+        # first order and total order indices
         firstorder[i] = first_order(A, AB[:, i], B)[1] # array to scalar with [1]
-        firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r]))
-
         totalorder[i] = total_order(A, AB[:, i], B)[1] # array to scalar with [1]
-        totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r]))
 
+        # first order and total order indice confidence intervals
+        conf_flag ? firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r])) : nothing
+        conf_flag ? totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r])) : nothing
+
+        # second order indices
         if calc_second_order
             for j in (i+1):D
                 secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)[1] # array to scalar with [1]
-                secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r])))
+                conf_flag ? secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r]))) : nothing
             end
         end
     end
 
     if calc_second_order
-        results = Dict(
-            :firstorder         => firstorder,
-            :firstorder_conf    => firstorder_conf,
-            :totalorder         => totalorder,
-            :totalorder_conf    => totalorder_conf,
-            :secondorder        => secondorder,
-            :secondorder_conf   => secondorder_conf
-        )
+        if conf_flag
+            results = Dict(
+                :firstorder         => firstorder,
+                :firstorder_conf    => firstorder_conf,
+                :totalorder         => totalorder,
+                :totalorder_conf    => totalorder_conf,
+                :secondorder        => secondorder,
+                :secondorder_conf   => secondorder_conf
+            )
+        else
+            results = Dict(
+                :firstorder         => firstorder,
+                :totalorder         => totalorder,
+                :secondorder        => secondorder,
+            )
+        end
     else 
-        results = Dict(
-            :firstorder         => firstorder,
-            :firstorder_conf    => firstorder_conf,
-            :totalorder         => totalorder,
-            :totalorder_conf    => totalorder_conf
-        )
+        if conf_flag
+            results = Dict(
+                :firstorder         => firstorder,
+                :firstorder_conf    => firstorder_conf,
+                :totalorder         => totalorder,
+                :totalorder_conf    => totalorder_conf
+            )
+        else
+            results = Dict(
+                :firstorder         => firstorder,
+                :totalorder         => totalorder,
+            )
+        end
     end
-
-
     return results
 end
 
