@@ -46,9 +46,11 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
     N = data.N # number of samples
 
     # values for CI calculations
-    r = rand(1:N, N, num_resamples)
-    Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
-
+    if conf_flag
+        r = rand(1:N, N, num_resamples)
+        Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
+    end
+    
     # normalize model output
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
 
