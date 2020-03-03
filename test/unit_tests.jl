@@ -109,3 +109,8 @@ for CI in results3[:totalorder_conf]
     @test ismissing(CI) || CI > 0
 end
 @test sum(results3[:totalorder]) > sum(results3[:firstorder])
+
+@test_throws ErrorException results4 = analyze(data3, Y3; num_resamples = nothing)
+@test_throws ErrorException results4 = analyze(data3, Y3; conf_level = nothing)
+results4 = analyze(data3, Y3; num_resamples = nothing, conf_level = nothing)
+@test length(results4) == 3
