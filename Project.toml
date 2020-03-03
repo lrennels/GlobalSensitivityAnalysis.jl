@@ -1,6 +1,6 @@
 name = "GlobalSensitivityAnalysis"
 uuid = "1b10255b-6da3-57ce-9089-d24e8517b87e"
-version = "0.0.8"
+version = "0.0.9"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
