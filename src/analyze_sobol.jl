@@ -31,7 +31,7 @@ are Nothing than no confidence intervals will be calculated.
 function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95) where S
 
     # handle confidence interval flag
-    num_nothings = isnothing(num_resamples) + isnothing(conf_level)
+    num_nothings = (num_resamples === nothing) + (conf_level === nothing)
     if num_nothings == 1
         error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
     elseif num_nothings == 2
