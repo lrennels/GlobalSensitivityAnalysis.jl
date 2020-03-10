@@ -110,7 +110,13 @@ for CI in results3[:totalorder_conf]
 end
 @test sum(results3[:totalorder]) > sum(results3[:firstorder])
 
-@test_throws ErrorException results4 = analyze(data3, Y3; num_resamples = nothing)
-@test_throws ErrorException results4 = analyze(data3, Y3; conf_level = nothing)
+if(VERSION < v"1.3.0")
+    errortype = ArgumentError
+else
+    errortype = ErrorException
+end
+@test_throws errortype results4 = analyze(data3, Y3; num_resamples = nothing)
+@test_throws errortype results4 = analyze(data3, Y3; conf_level = nothing)
+
 results4 = analyze(data3, Y3; num_resamples = nothing, conf_level = nothing)
 @test length(results4) == 3
