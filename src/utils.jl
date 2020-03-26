@@ -22,6 +22,23 @@ mutable struct SobolData
     end
 end
 
+"""
+    DeltaData
+
+A struct which holds all information needed for the sampling and analysis of a
+specific problem using Delta Analysis:
+
+`params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
+`N::Int = 1000`: the number of runs
+"""
+mutable struct DeltaData
+    params::Union{OrderedDict{Symbol, <:Any}, Nothing}
+    N::Int 
+
+    function DeltaData(;params= nothing, calc_second_order = true, N = 1000)
+        return new(params, N)
+    end
+end
 
 """
     scale_sobol_seq!(sequence::AbstractArray{<:Number, N}, dists::AbstractArray{T, N})
@@ -40,4 +57,21 @@ function scale_sobol_seq!(sequence::AbstractArray{<:Number, N1}, dists::Abstract
             sequence[:, [param, param + D]] = quantile(dist, sequence[:, [param, param + D]])
         end
     end
+end
+
+"""
+    _check_conf_flag(num_resamples::Union{Nothing, Int}, conf_level::Union{Nothing, Number})        
+Check to see if confdience interval should be calculated based on the provided
+`num_resamples` and `conf_level`.  Error if only one has a value and the other is Nothing.
+"""
+function _check_conf_flag(num_resamples::Union{Nothing, Int}, conf_level::Union{Nothing, Number})
+    num_nothings = (num_resamples === nothing) + (conf_level === nothing)
+    if num_nothings == 1
+        error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
+    elseif num_nothings == 2
+        conf_flag = false
+    else
+        conf_flag = true
+    end
+    return conf_flag
 end

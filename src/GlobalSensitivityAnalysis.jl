@@ -11,6 +11,7 @@ export
 include("utils.jl")
 include("sample_sobol.jl")
 include("analyze_sobol.jl")
+include("analyze_delta.jl")
 include("test_functions/ishigami.jl")
 
 end # module

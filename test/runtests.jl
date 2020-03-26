@@ -1,11 +1,17 @@
 using Test
 
-@testset "Compare to SALib.py" begin
-    include("test_sobolsequence.jl")
-    include("test_uniform.jl")
-    include("test_nonuniform.jl")
-end
+@testset "Test Delta Method" begin
+    # TODO
+end 
 
-@testset "Unit Testing" begin
-    include("unit_tests.jl")
+@testset "Test Sobol Method" begin
+    @testset "Compare to SALib.py" begin
+        include("sobol/test_sobolsequence.jl")
+        include("sobol/test_uniform.jl")
+        include("sobol/test_nonuniform.jl")
+    end
+
+    @testset "Unit Testing" begin
+        include("sobol/unit_tests.jl")
+    end
 end
