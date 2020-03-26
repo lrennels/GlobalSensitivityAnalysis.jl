@@ -76,7 +76,7 @@ end
         end
     end
 
-    # TODO Choose proper tolerance for CI comparison
+    # TODO Choose proper tolerance for CI comparison and include them
     # @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = 1e-1
     # @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = 1e-1
 

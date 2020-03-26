@@ -85,6 +85,6 @@ end
         end
     end
 
-    # TODO CI comparisons
+    # TODO confidence interval tests
 
 end

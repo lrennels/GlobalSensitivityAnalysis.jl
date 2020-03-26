@@ -13,9 +13,13 @@ The package currently includes the following methods:
 
 - Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
 
+- Delta Moment-Independent Measure ([Borgonovo 2007](http://www.sciencedirect.com/science/article/pii/S0951832006000883), [Plischke et al. 2013](http://www.sciencedirect.com/science/article/pii/S0377221712008995))
+
 ## The API
 
-The API contains two primary functions: `sample` and `analyze`, as well as the type `SobolData`.  Note that while these functions currently only refer to Sobol Analysis, they will be generalized and expanded to include other sensitivity analysis methods (likely mirroring those included in SALib). 
+The API contains two primary functions: `sample` and `analyze`. These two functions call methods based on the type parameterization of their `data` argument, which is either of type `SobolData` or `DeltaData`.  Note that for now the `sample` function will call the most used sampling protocol for the particular method, (Sobol sequence for Sobol method and Latin Hypercube sampling for Delta method), but this should (TODO) be rearranged and generalized since, for example, the Delta method can also just as well use Sobol sequence sampling and other methods. 
+
+### Sobol Sensitivity Analyis
 
 Sampling with `sample` is the first of the two main steps in an analysis, generating the model inputs to be run through a model of choice and produce the outputs analyzed in the `analyze` function.  The signature for this function is as follows.
 
@@ -46,7 +50,7 @@ specific problem using Sobol Analysis:
 After sampling with `sample`, use the resulting of matrix of parameter combinations to run your model, producing a vector of results.  The next and final step is to analyze the results with your `model_output` using the `analyze` function with the signature below. This function takes the same `SobolData` as `sample`, as well as the `model_output` vector and produces a dictionary of results.  This dictionary will include the `:firstorder`, `:totalorder`, and (optionally) `:secondorder` indices for each parameter.
 
 ```julia
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 10_000, conf_level::Number = 0.95)
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 1_000, conf_level::Number = 0.95)
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
@@ -81,6 +85,9 @@ Y = ishigami(samples)
 # perform Sobol Analysis
 analyze(data, Y)
 ```
+### Delta Moment-Independent Measure
+
+TODO
 
 ## References
 

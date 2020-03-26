@@ -20,7 +20,7 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95) where S
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
@@ -28,7 +28,7 @@ with the sensitivity indices and respective confidence intervals for each of the
 parameters defined using the `num_resamples` and `conf_level` keyword args. If these
 are Nothing than no confidence intervals will be calculated.
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95) where S
 
     conf_flag = _check_conf_flag(num_resamples, conf_level)
 
