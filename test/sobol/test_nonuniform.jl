@@ -7,10 +7,10 @@ using DataStructures
 ################################################################################
 ## JULIA
 ################################################################################
-include("../src/utils.jl")
-include("../src/sample_sobol.jl")
-include("../src/analyze_sobol.jl")
-include("../src/test_functions/ishigami.jl")
+include("../../src/utils.jl")
+include("../../src/sample_sobol.jl")
+include("../../src/analyze_sobol.jl")
+include("../../src/test_functions/ishigami.jl")
 
 # define the (uncertain) parameters of the problem and their distributions
 data = SobolData(

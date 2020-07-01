@@ -1,10 +1,10 @@
 using Test
 using Distributions
 
-include("../src/utils.jl")
-include("../src/sample_sobol.jl")
-include("../src/test_functions/ishigami.jl")
-include("../src/analyze_sobol.jl")
+include("../../src/utils.jl")
+include("../../src/sample_sobol.jl")
+include("../../src/test_functions/ishigami.jl")
+include("../../src/analyze_sobol.jl")
 
 ##
 ## 1. utils
