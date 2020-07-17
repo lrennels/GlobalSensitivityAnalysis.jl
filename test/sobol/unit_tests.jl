@@ -36,11 +36,11 @@ data3 = SobolData(params = parameters)
 data4 = SobolData(calc_second_order = false)
 data5 = SobolData(N = 100)
 
-# scale_sobol_seq!
+# scale_samples!
 seq = rand(100, 8)
 original_seq = copy(seq)
 dists = [Normal(1, 0.2), Uniform(0.75, 1.25), LogNormal(20,4), TriangularDist(0, 4, 1)]
-scale_sobol_seq!(seq, dists)
+scale_samples!(seq, dists)
 @test size(seq) == size(original_seq)
 @test seq != original_seq
 
