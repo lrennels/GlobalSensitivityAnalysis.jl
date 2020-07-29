@@ -24,7 +24,7 @@ data = SobolData(
         :x2 => Uniform(0.75, 1.25),
         :x3 => LogNormal(20, 4),
         :x4 => TriangularDist(0, 4, 1)),
-    N = 100
+    N = 1000
 )
 
 N = data.N
@@ -97,6 +97,14 @@ end
         end
     end
 
-    # TODO CI comparisons
+    # TODO Choose proper tolerance for CI comparison, this is fairly arbitrary thus far
+    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = 2
+    @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = 2
+
+    for i = 1:D
+        for j = i+1:D
+            @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = 10
+        end
+    end
 
 end
