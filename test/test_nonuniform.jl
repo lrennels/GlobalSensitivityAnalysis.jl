@@ -5,6 +5,12 @@ using CSVFiles
 using DataStructures
 
 ################################################################################
+## SET CONSTANTS
+################################################################################
+ATOL = 1e-9
+RTOL = 1e-12
+
+################################################################################
 ## JULIA
 ################################################################################
 include("../src/utils.jl")
@@ -34,9 +40,9 @@ julia_ishigami = ishigami(convert(Matrix, julia_samples)) |> DataFrame
 
 # analysis
 julia_A, julia_B, julia_AB, julia_BA = split_output(convert(Matrix, julia_ishigami), N, D, data.calc_second_order)
-julia_results = analyze(data, convert(Matrix, julia_ishigami), num_resamples = 1_000) 
+julia_results = analyze(data, convert(Matrix, julia_ishigami), num_resamples = 10_000) 
 
-################################################################################
+################################################################################ 
 ## Python
 ################################################################################
 
@@ -65,23 +71,29 @@ py_totalorder_conf = load("data/py_nonuniform/py_totalorder_conf.csv", header_ex
 @testset "Non-Uniform Sampling" begin
     for i = 1:D
         if i != 3 #lognormal treated differently because big values
-            @test convert(Matrix, julia_samples)[:, i] ≈ convert(Matrix, py_samples)[:, i] atol = 1e-9 # lognormal numbers too big for atol
+            @test convert(Matrix, julia_samples)[:, i] ≈ convert(Matrix, py_samples)[:, i] atol = ATOL
         else
-            # lognormal scales to huge numbers, so need to test differently
-            julia_lognorm = convert(Matrix, julia_samples)[:,i]
-            py_lognorm = convert(Matrix, py_samples)[:,i]
-            @test maximum((julia_lognorm .- py_lognorm) ./ py_lognorm) < 1e-9
+            # lognormal scales to huge numbers, so use rtol instead
+            @test convert(Matrix, julia_samples)[:, i] ≈ convert(Matrix, py_samples)[:,i] rtol = RTOL
         end
     end
 end
 
 @testset "Non-Uniform Analysis" begin
-    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = 1e-9
-    @test julia_results[:totalorder]≈ convert(Matrix, py_totalorder) atol = 1e-9
+    
+    # use rtol because of huge numbers
+    @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) rtol = RTOL
+    @test julia_A ≈ convert(Matrix, py_A) rtol = RTOL
+    @test julia_B ≈ convert(Matrix, py_B) rtol = RTOL
+    @test julia_AB ≈ convert(Matrix, py_AB) rtol = RTOL
+    @test julia_BA ≈ convert(Matrix, py_BA) rtol = RTOL
+
+    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL
+    @test julia_results[:totalorder]≈ convert(Matrix, py_totalorder) atol = ATOL
 
     for i = 1:D
         for j = i+1:D
-            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = 1e-9
+            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = ATOL
         end
     end
 
