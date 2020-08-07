@@ -39,7 +39,7 @@ A struct which holds all information needed for the sampling and analysis of a
 specific problem using Sobol Analysis:
 
 `params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
-`calc_second_order::Bool = false`: whether or not to calculate second order sensitivity indices
+`calc_second_order::Bool = true`: whether or not to calculate second order sensitivity indices
 `N::Int = 1000`: the number of runs
 ```
 
