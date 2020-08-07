@@ -124,14 +124,8 @@ samples = sample(data)
 Y = ishigami(samples)
 results = analyze(data, Y)
 
-if(VERSION < v"1.3.0")
-    errortype = ArgumentError
-else
-    errortype = ErrorException
-end
-
-@test_throws errortype analyze(data, Y; num_resamples = nothing)
-@test_throws errortype analyze(data, Y; conf_level = nothing)
+@test_throws ErrorException analyze(data, Y; num_resamples = nothing)
+@test_throws ErrorException analyze(data, Y; conf_level = nothing)
 
 @test length(analyze(data, Y; num_resamples = nothing, conf_level = nothing)) == 3 # no confidence intervals
 results = analyze(data, Y; progress_meter = false) # no progress bar should show
@@ -141,4 +135,4 @@ results_override = analyze(data, Y, N_override = data.N)
 results_original = analyze(data, Y)
 @test results_override[:firstorder] == results_original[:firstorder]
 @test results_override[:totalorder] == results_original[:totalorder] 
-@test_throws errortype analyze(data1, Y1; N_override = data.N + 1) # N_override > N
+@test_throws ErrorException analyze(data1, Y1; N_override = data.N + 1) # N_override > N
