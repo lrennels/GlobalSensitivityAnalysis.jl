@@ -20,7 +20,7 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true) where S
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
@@ -28,9 +28,10 @@ with the sensitivity indices and respective confidence intervals for each of the
 parameters defined using the `num_resamples` and `conf_level` keyword args. If these
 are Nothing than no confidence intervals will be calculated. The `progress_meter`
 keyword argument indicates whether a progress meter will be displayed and defaults
-to true.
+to true. The `N_override` keyword argument allows users to override the `N` used in
+a specific `analyze` call to analyze just a subset (useful for convergence graphs).
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
 
     # handle confidence interval flag
     num_nothings = (num_resamples === nothing) + (conf_level === nothing)
@@ -45,7 +46,22 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
     # define constants
     calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
-    N = data.N # number of samples
+
+    # deal with overriding N
+    if N_override === nothing
+        N = data.N # number of samples
+    else
+        N_override > data.N ? error("N_override ($N_override) cannot be greater than original N used in sampling ($(data.N))") : nothing 
+        N = N_override # number of samples
+
+        # reduce the output to just what should be considered for this N
+        if data.calc_second_order
+            lastrow = N * ((2 * D) + 2)
+        else
+            lastrow = N * (D + 2)
+        end
+        model_output = model_output[1:lastrow]
+    end
 
     # values for CI calculations
     if conf_flag

@@ -39,7 +39,7 @@ data5 = SobolData(N = 100)
 # scale_sobol_seq!
 seq = rand(100, 8)
 original_seq = copy(seq)
-dists = [Normal(1, 0.2), Uniform(0.75, 1.25), LogNormal(20,4), TriangularDist(0, 4, 1)]
+dists = [Normal(1, 0.2), Uniform(0.75, 1.25), LogNormal(0, 0.5), TriangularDist(0, 4, 1)]
 scale_sobol_seq!(seq, dists)
 @test size(seq) == size(original_seq)
 @test seq != original_seq
@@ -69,54 +69,76 @@ end
 @test_throws ErrorException sample(data5) # params are nothing
 
 ##
-## 4. Analyze Sobol
+## 4a. Analyze Sobol
 ##
 
 Y1 = ishigami(samples)
-results1 = analyze(data1, Y1)
-for Si in results1[:firstorder]
+results = analyze(data1, Y1)
+for Si in results[:firstorder]
     @test Si <= 1
 end
-for CI in results1[:firstorder_conf]
+for CI in results[:firstorder_conf]
     @test CI > 0 
 end
-for St in results1[:totalorder]
+for St in results[:totalorder]
     @test St <= 1
 end
-for CI in results1[:totalorder_conf]
+for CI in results[:totalorder_conf]
     @test CI > 0 
 end
-@test sum(results1[:totalorder]) > sum(results1[:firstorder])
+@test sum(results[:totalorder]) > sum(results[:firstorder])
 
 Y3 = ishigami(samples3)
-results3 = analyze(data3, Y3)
-for Si in results3[:firstorder]
+results = analyze(data3, Y3)
+for Si in results[:firstorder]
     @test Si <= 1
 end
-for CI in results3[:firstorder_conf]
+for CI in results[:firstorder_conf]
     @test ismissing(CI) || CI > 0
 end
-for S2i in results3[:secondorder]
+for S2i in results[:secondorder]
     @test ismissing(S2i) || S2i <= 1
 end
-for CI in results3[:secondorder_conf]
+for CI in results[:secondorder_conf]
     @test ismissing(CI) || CI > 0
 end
-for St in results3[:totalorder]
+for St in results[:totalorder]
     @test St <= 1
 end
-for CI in results3[:totalorder_conf]
+for CI in results[:totalorder_conf]
     @test ismissing(CI) || CI > 0
 end
-@test sum(results3[:totalorder]) > sum(results3[:firstorder])
+@test sum(results[:totalorder]) > sum(results[:firstorder])
+
+##
+## 4b. Analyze Sobol Optional Keyword Args
+##
+
+data = SobolData(
+    params = OrderedDict(:x1 => Normal(1, 0.2),
+        :x2 => Uniform(0.75, 1.25),
+        :x3 => LogNormal(0, 0.5)),
+    N = 1000
+)
+samples = sample(data)
+Y = ishigami(samples)
+results = analyze(data, Y)
 
 if(VERSION < v"1.3.0")
     errortype = ArgumentError
 else
     errortype = ErrorException
 end
-@test_throws errortype results4 = analyze(data3, Y3; num_resamples = nothing)
-@test_throws errortype results4 = analyze(data3, Y3; conf_level = nothing)
 
-results4 = analyze(data3, Y3; num_resamples = nothing, conf_level = nothing)
-@test length(results4) == 3
+@test_throws errortype analyze(data, Y; num_resamples = nothing)
+@test_throws errortype analyze(data, Y; conf_level = nothing)
+
+@test length(analyze(data, Y; num_resamples = nothing, conf_level = nothing)) == 3 # no confidence intervals
+results = analyze(data, Y; progress_meter = false) # no progress bar should show
+
+@test length(analyze(data, Y; N_override = 10)) == 6 
+results_override = analyze(data, Y, N_override = data.N)
+results_original = analyze(data, Y)
+@test results_override[:firstorder] == results_original[:firstorder]
+@test results_override[:totalorder] == results_original[:totalorder] 
+@test_throws errortype analyze(data1, Y1; N_override = data.N + 1) # N_override > N
