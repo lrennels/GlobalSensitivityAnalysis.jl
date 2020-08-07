@@ -4,6 +4,7 @@ using Test
     include("test_sobolsequence.jl")
     include("test_uniform.jl")
     include("test_nonuniform.jl")
+    include("test_sobolCI.jl")
 end
 
 @testset "Unit Testing" begin

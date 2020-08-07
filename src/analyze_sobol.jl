@@ -139,7 +139,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (b)]
 """
 function first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))
+    return (mean(B .* (AB .- A), dims = 1) ./ var(vcat(A, B), dims = 1, corrected = false))
 end
 
 """
@@ -151,7 +151,7 @@ the variance of `[A B]`. [Saltelli et al. , 2002]
 """
 function second_order(A::AbstractArray{<:Number, N}, ABi::AbstractArray{<:Number, N}, ABj::AbstractArray{<:Number, N}, BAi::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
 
-    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) / var(vcat(A, B), corrected = false))
+    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) ./ var(vcat(A, B), dims = 1, corrected = false))
     Si = first_order(A, ABi, B)
     Sj = first_order(A, ABj, B)
 
@@ -166,7 +166,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (f)].
 """
 function total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))
+    return (0.5 * mean((A .- AB).^2, dims = 1) ./ var(vcat(A, B), dims = 1, corrected = false))
 end
 
 """

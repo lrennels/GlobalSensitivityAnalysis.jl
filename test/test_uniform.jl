@@ -8,7 +8,7 @@ using DataStructures
 ## SET CONSTANTS
 ################################################################################
 ATOL = 1e-9
-RTOL = 1e-12
+ATOL_CI = 1e-2
 
 ################################################################################
 ## JULIA
@@ -79,17 +79,17 @@ end
 
     for i = 1:D
         for j = i+1:D
-            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = 1e-9
+            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = ATOL
         end
     end
 
-    # TODO Choose proper tolerance for CI comparison, this is fairly arbitrary thus far
-    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = 1e-2
-    @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = 1e-1
+    # test confidence intervals
+    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
+    @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = ATOL_CI
 
     for i = 1:D
         for j = i+1:D
-            @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = 1e-2
+            @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = ATOL_CI
         end
     end
 end

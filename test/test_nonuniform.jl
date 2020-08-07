@@ -8,7 +8,7 @@ using DataStructures
 ## SET CONSTANTS
 ################################################################################
 ATOL = 1e-9
-RTOL = 1e-12
+ATOL_CI = 1e-2
 
 ################################################################################
 ## JULIA
@@ -22,8 +22,7 @@ include("../src/test_functions/ishigami.jl")
 data = SobolData(
     params = OrderedDict(:x1 => Normal(1, 0.2),
         :x2 => Uniform(0.75, 1.25),
-        :x3 => LogNormal(20, 4),
-        :x4 => TriangularDist(0, 4, 1)),
+        :x3 => LogNormal(0, 0.5)),
     N = 1000
 )
 
@@ -47,7 +46,7 @@ julia_results = analyze(data, convert(Matrix, julia_ishigami), num_resamples = 1
 ################################################################################
 
 # sampling
-py_samples = load("data/py_nonuniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3", "x4"]) |> DataFrame
+py_samples = load("data/py_nonuniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
 py_ishigami = load("data/py_nonuniform/py_ishigami.csv", header_exists=false) |> DataFrame
 
 # analysis
@@ -69,24 +68,16 @@ py_totalorder_conf = load("data/py_nonuniform/py_totalorder_conf.csv", header_ex
 ################################################################################
 
 @testset "Non-Uniform Sampling" begin
-    for i = 1:D
-        if i != 3 #lognormal treated differently because big values
-            @test convert(Matrix, julia_samples)[:, i] ≈ convert(Matrix, py_samples)[:, i] atol = ATOL
-        else
-            # lognormal scales to huge numbers, so use rtol instead
-            @test convert(Matrix, julia_samples)[:, i] ≈ convert(Matrix, py_samples)[:,i] rtol = RTOL
-        end
-    end
+    @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = ATOL
 end
 
 @testset "Non-Uniform Analysis" begin
     
-    # use rtol because of huge numbers
-    @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) rtol = RTOL
-    @test julia_A ≈ convert(Matrix, py_A) rtol = RTOL
-    @test julia_B ≈ convert(Matrix, py_B) rtol = RTOL
-    @test julia_AB ≈ convert(Matrix, py_AB) rtol = RTOL
-    @test julia_BA ≈ convert(Matrix, py_BA) rtol = RTOL
+    @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) atol = ATOL
+    @test julia_A ≈ convert(Matrix, py_A) atol = ATOL
+    @test julia_B ≈ convert(Matrix, py_B) atol = ATOL
+    @test julia_AB ≈ convert(Matrix, py_AB) atol = ATOL
+    @test julia_BA ≈ convert(Matrix, py_BA) atol = ATOL
 
     @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL
     @test julia_results[:totalorder]≈ convert(Matrix, py_totalorder) atol = ATOL
@@ -97,13 +88,13 @@ end
         end
     end
 
-    # TODO Choose proper tolerance for CI comparison, this is fairly arbitrary thus far
-    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = 2
-    @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = 2
+    # test confidence intervals (using rtol here, big values throw things off)
+    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
+    @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = ATOL_CI
 
     for i = 1:D
         for j = i+1:D
-            @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = 10
+            @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = ATOL_CI
         end
     end
 
