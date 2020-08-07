@@ -5,6 +5,12 @@ using CSVFiles
 using DataStructures
 
 ################################################################################
+## SET CONSTANTS
+################################################################################
+ATOL = 1e-9
+ATOL_CI = 1e-2
+
+################################################################################
 ## JULIA
 ################################################################################
 include("../src/utils.jl")
@@ -29,7 +35,7 @@ julia_ishigami = ishigami(convert(Matrix, julia_samples)) |> DataFrame
 
 # analysis
 julia_A, julia_B, julia_AB, julia_BA = split_output(convert(Matrix, julia_ishigami), N, D, data.calc_second_order)
-julia_results = analyze(data, convert(Matrix, julia_ishigami); num_resamples = 1_000) 
+julia_results = analyze(data, convert(Matrix, julia_ishigami); num_resamples = 10_000) 
 
 ################################################################################
 ## Python
@@ -58,31 +64,32 @@ py_totalorder_conf = load("data/py_uniform/py_totalorder_conf.csv", header_exist
 ################################################################################
 
 @testset "Uniform Sampling" begin
-    @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = 1e-9
+    @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = ATOL
 end
 
 @testset "Uniform Analysis" begin
-    @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) atol = 1e-9
-    @test julia_A ≈ convert(Matrix, py_A) atol = 1e-9
-    @test julia_B ≈ convert(Matrix, py_B) atol = 1e-9
-    @test julia_AB ≈ convert(Matrix, py_AB) atol = 1e-9
-    @test julia_BA ≈ convert(Matrix, py_BA) atol = 1e-9
-    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = 1e-9
-    @test julia_results[:totalorder] ≈ convert(Matrix, py_totalorder) atol = 1e-9
+    @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) atol = ATOL
+    @test julia_A ≈ convert(Matrix, py_A) atol = ATOL
+    @test julia_B ≈ convert(Matrix, py_B) atol = ATOL
+    @test julia_AB ≈ convert(Matrix, py_AB) atol = ATOL
+    @test julia_BA ≈ convert(Matrix, py_BA) atol = ATOL
+
+    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL
+    @test julia_results[:totalorder] ≈ convert(Matrix, py_totalorder) atol = ATOL
 
     for i = 1:D
         for j = i+1:D
-            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = 1e-9
+            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = ATOL
         end
     end
 
-    # TODO Choose proper tolerance for CI comparison
-    # @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = 1e-1
-    # @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = 1e-1
+    # test confidence intervals
+    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
+    @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = ATOL_CI
 
     for i = 1:D
         for j = i+1:D
-            # @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = 1e-1
+            @test julia_results[:secondorder_conf][i,j] ≈ convert(Matrix, py_secondorder_conf)[i,j] atol = ATOL_CI
         end
     end
 end
