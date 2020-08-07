@@ -20,15 +20,17 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95) where S
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
 parameters defined using the `num_resamples` and `conf_level` keyword args. If these
-are Nothing than no confidence intervals will be calculated.
+are Nothing than no confidence intervals will be calculated. The `progress_meter`
+keyword argument indicates whether a progress meter will be displayed and defaults
+to true.
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true) where S
 
     # handle confidence interval flag
     num_nothings = (num_resamples === nothing) + (conf_level === nothing)
@@ -71,13 +73,13 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
 
     # set up progress meter
     counter = 0
-    p = Progress(D, counter, "Calculating indices for $D parameters ...")
+    progress_meter ? p = Progress(D, counter, "Calculating indices for $D parameters ...") : nothing
 
     for i in 1:D
 
         # increment progress meter
         counter += 1
-        ProgressMeter.update!(p, counter)      
+        progress_meter ? ProgressMeter.update!(p, counter) : nothing  
         
         # first order and total order indices
         firstorder[i] = first_order(A, AB[:, i], B)[1] # array to scalar with [1]
