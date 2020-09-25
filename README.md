@@ -43,19 +43,23 @@ A struct which holds all information needed for the sampling and analysis of a
 specific problem using Sobol Analysis:
 
 `params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
-`calc_second_order::Bool = false`: whether or not to calculate second order sensitivity indices
+`calc_second_order::Bool = true`: whether or not to calculate second order sensitivity indices
 `N::Int = 1000`: the number of runs
 ```
 
 After sampling with `sample`, use the resulting of matrix of parameter combinations to run your model, producing a vector of results.  The next and final step is to analyze the results with your `model_output` using the `analyze` function with the signature below. This function takes the same `SobolData` as `sample`, as well as the `model_output` vector and produces a dictionary of results.  This dictionary will include the `:firstorder`, `:totalorder`, and (optionally) `:secondorder` indices for each parameter.
 
 ```julia
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Int = 1_000, conf_level::Number = 0.95)
+    function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) 
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
-parameters.
+parameters defined using the `num_resamples` and `conf_level` keyword args. If these
+are Nothing than no confidence intervals will be calculated. The `progress_meter`
+keyword argument indicates whether a progress meter will be displayed and defaults
+to true. The `N_override` keyword argument allows users to override the `N` used in
+a specific `analyze` call to analyze just a subset (useful for convergence graphs).
 ```
 
 An example of the basic flow can be found in `src/main.jl` using the Ishigami test function in `src/test_functions/ishigami.jl`, and is copied and commented below for convenience.

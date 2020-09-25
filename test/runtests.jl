@@ -1,11 +1,13 @@
 using Test
 
+<<<<<<< HEAD
 @testset "Test Sobol Method" begin
 
     @testset "Compare to SALib.py" begin
         include("sobol/test_sobolsequence.jl")
         include("sobol/test_uniform.jl")
         include("sobol/test_nonuniform.jl")
+        include("sobol/test_sobolCI.jl")
     end
 
     @testset "Unit Testing" begin
@@ -21,7 +23,5 @@ using Test
     @testset "Unit Testing" begin
         # TODO
     end
-
 end
 
-end

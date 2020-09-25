@@ -20,22 +20,48 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95) where S
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
 parameters defined using the `num_resamples` and `conf_level` keyword args. If these
-are Nothing than no confidence intervals will be calculated.
+are Nothing than no confidence intervals will be calculated. The `progress_meter`
+keyword argument indicates whether a progress meter will be displayed and defaults
+to true. The `N_override` keyword argument allows users to override the `N` used in
+a specific `analyze` call to analyze just a subset (useful for convergence graphs).
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
 
-    conf_flag = _check_conf_flag(num_resamples, conf_level)
+    # handle confidence interval flag
+    num_nothings = (num_resamples === nothing) + (conf_level === nothing)
+    if num_nothings == 1
+        error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
+    elseif num_nothings == 2
+        conf_flag = false
+    else
+        conf_flag = true
+    end
 
     # define constants
     calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
-    N = data.N # number of samples
+
+    # deal with overriding N
+    if N_override === nothing
+        N = data.N # number of samples
+    else
+        N_override > data.N ? error("N_override ($N_override) cannot be greater than original N used in sampling ($(data.N))") : nothing 
+        N = N_override # number of samples
+
+        # reduce the output to just what should be considered for this N
+        if data.calc_second_order
+            lastrow = N * ((2 * D) + 2)
+        else
+            lastrow = N * (D + 2)
+        end
+        model_output = model_output[1:lastrow]
+    end
 
     # values for CI calculations
     if conf_flag
@@ -63,13 +89,13 @@ function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_
 
     # set up progress meter
     counter = 0
-    p = Progress(D, counter, "Calculating indices for $D parameters ...")
+    progress_meter ? p = Progress(D, counter, "Calculating indices for $D parameters ...") : nothing
 
     for i in 1:D
 
         # increment progress meter
         counter += 1
-        ProgressMeter.update!(p, counter)      
+        progress_meter ? ProgressMeter.update!(p, counter) : nothing  
         
         # first order and total order indices
         firstorder[i] = first_order(A, AB[:, i], B)[1] # array to scalar with [1]
@@ -131,7 +157,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (b)]
 """
 function first_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (mean(B .* (AB .- A), dims = 1) / var(vcat(A, B), corrected = false))
+    return (mean(B .* (AB .- A), dims = 1) ./ var(vcat(A, B), dims = 1, corrected = false))
 end
 
 """
@@ -143,7 +169,7 @@ the variance of `[A B]`. [Saltelli et al. , 2002]
 """
 function second_order(A::AbstractArray{<:Number, N}, ABi::AbstractArray{<:Number, N}, ABj::AbstractArray{<:Number, N}, BAi::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
 
-    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) / var(vcat(A, B), corrected = false))
+    Vj = (mean(BAi .* ABj .- A .* B, dims = 1) ./ var(vcat(A, B), dims = 1, corrected = false))
     Si = first_order(A, ABi, B)
     Sj = first_order(A, ABj, B)
 
@@ -158,7 +184,7 @@ separated out into `A`, `AB`, and `A` and normalize by the variance of `[A B]`. 
 2010 Table 2 eq (f)].
 """
 function total_order(A::AbstractArray{<:Number, N}, AB::AbstractArray{<:Number, N}, B::AbstractArray{<:Number, N}) where N
-    return (0.5 * mean((A .- AB).^2, dims = 1) / var(vcat(A, B), corrected = false))
+    return (0.5 * mean((A .- AB).^2, dims = 1) ./ var(vcat(A, B), dims = 1, corrected = false))
 end
 
 """
