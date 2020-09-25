@@ -35,7 +35,7 @@ mutable struct DeltaData
     params::Union{OrderedDict{Symbol, <:Any}, Nothing}
     N::Int 
 
-    function DeltaData(;params= nothing, calc_second_order = true, N = 1000)
+    function DeltaData(;params= nothing, N = 1000)
         return new(params, N)
     end
 end

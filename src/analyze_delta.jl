@@ -26,9 +26,12 @@ Performs a Delta Moment-Independent Analysis on the `model_output` produced with
 the problem defined by the information in `data` and `model_input` and returns
 a dictionary of results with the sensitivity indices and respective confidence 
 intervals for each of the parameters defined using the `num_resamples` and `conf_level`
-keyword args. 
+keyword args.  The `progress_meter` keyword argument indicates whether a progress meter 
+will be displayed and defaults to true. The `N_override` keyword argument allows users 
+to override the `N` used in a specific `analyze` call to analyze just a subset 
+(useful for convergence graphs).
 """
-function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, model_output::AbstractArray{<:Number, S2}; num_resamples::Int = 1_000, conf_level::Number = 0.95) where S1 where S2 
+function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, model_output::AbstractArray{<:Number, S2}; num_resamples::Int = 1_000, conf_level::Number = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S1 where S2 
     
     # this method requires a confidence interval and num_resamples, so we do not
     # currently allow these to be set to Nothing as we did with the Sobol method ...
@@ -37,9 +40,17 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
     # conf_flag = _check_conf_flag(num_resamples, conf_level)
 
     # define constants
-    calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
-    N = data.N # number of samples
+    # deal with overriding N
+    if N_override === nothing
+        N = data.N # number of samples
+    else
+        N_override > data.N ? error("N_override ($N_override) cannot be greater than original N used in sampling ($(data.N))") : nothing 
+        N = N_override # number of samples
+
+        # reduce the output to just what should be considered for this N
+        model_output = model_output[1:N]
+    end
 
     M = min(ceil(N ^ (2 / (7 + tanh((1500 - N) / 500)))), 48)
     m = LinRange(0, N, M + 1)
@@ -51,7 +62,16 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
     firstorder_conf = Array{Float64}(undef, D)
     delta_conf = Array{Float64}(undef, D)
 
+    # set up progress meter
+    counter = 0
+    progress_meter ? p = Progress(D, counter, "Calculating indices for $D parameters ...") : nothing
+
     for i in 1:D
+
+         # increment progress meter
+         counter += 1
+         progress_meter ? ProgressMeter.update!(p, counter) : nothing  
+        
         delta[i], delta_conf = bias_reduced_delta(model_output, model_output_grid, model_input[:,i], m, num_resamples, conf_level)
         firstorder[i] = sobol_first(model_output, model_input[:,i], m)
         firstorder_conf[i] = sobol_first_conf(model_output, model_input[:,i], m, num_resamples, conf_level)

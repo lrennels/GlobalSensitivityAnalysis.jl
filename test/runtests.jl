@@ -1,6 +1,5 @@
 using Test
 
-<<<<<<< HEAD
 @testset "Test Sobol Method" begin
 
     @testset "Compare to SALib.py" begin
