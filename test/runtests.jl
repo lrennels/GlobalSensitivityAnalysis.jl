@@ -12,6 +12,7 @@ using Test
     @testset "Unit Testing" begin
         include("sobol/unit_tests.jl")
     end
+end
 
 @testset "Test Delta Method" begin
 
@@ -23,4 +24,3 @@ using Test
         # TODO
     end
 end
-
