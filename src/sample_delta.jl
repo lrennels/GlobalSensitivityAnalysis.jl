@@ -26,25 +26,19 @@ function sample(data::DeltaData)
 
     # generate samples
     for i = 1:D
-
         for j = 1:N
             
-            # NOTE: to perfeclty copy SALib using j - 1, probably not necessary 
-            low = (j-1) * d
-            high = (j-1) + 1
+            low = (j - 1) * d
+            high = j * d
             uniform_distrib = Uniform(low, high)
 
-            temp[j] = rand(uniform_distrib, 1)[1]
-            shuffle!(temp)
+            temp[j] = rand(uniform_distrib)
         end
-
-        for j = 1:N
-            result[j, i] = temp[j]
-        end
-
-        scale_samples!(result, [values(data.params)...]) # scale
-        return result
-
+        shuffle!(temp)
+        result[:, i] = temp
     end
+
+    scale_samples!(result, [values(data.params)...]) # scale
+    return result
 
 end

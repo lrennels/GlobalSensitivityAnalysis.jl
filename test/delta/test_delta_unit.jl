@@ -1,0 +1,115 @@
+using Test
+using Distributions
+using DataStructures
+
+import GlobalSensitivityAnalysis: ishigami
+
+##
+## 1. utils
+##
+
+# DeltaData
+N = 100
+parameters = OrderedDict(
+    :param1 => Normal(0,1),
+    :param2 => LogNormal(5, 20),
+    :param3 => TriangularDist(0, 4, 1)
+)
+
+data1 = DeltaData(params = parameters, N = N)
+@test data1.params[:param1] == parameters[:param1]
+@test data1.params[:param2] == parameters[:param2]
+@test data1.params[:param2] == parameters[:param2]
+@test data1.params[:param3] == parameters[:param3]
+@test data1.N == N
+
+data2 = DeltaData()
+@test data2.params == nothing
+@test data2.N == 1000
+
+data3 = DeltaData(params = parameters)
+data4 = DeltaData(N = 100)
+
+##
+## 2. Sample Delta
+##
+
+samples = sample(data1)
+@test size(samples, 2) == length(data1.params)
+@test size(samples, 1) == data1.N
+
+samples3 = sample(data3)
+@test size(samples3, 2) == length(data3.params)
+@test size(samples3, 1) == data3.N 
+
+@test_throws ErrorException sample(data2) # params are nothing
+@test_throws ErrorException sample(data4) # params are nothing
+
+# ##
+# ## 4a. Analyze Sobol
+# ##
+
+Y1 = ishigami(samples)
+results = analyze(data1, samples, Y1)
+for Si in results[:firstorder]
+    @test Si <= 1
+end
+# for CI in results[:firstorder_conf]
+#     @test CI > 0 
+# end
+# for St in results[:totalorder]
+#     @test St <= 1
+# end
+# for CI in results[:totalorder_conf]
+#     @test CI > 0 
+# end
+# @test sum(results[:totalorder]) > sum(results[:firstorder])
+
+# Y3 = ishigami(samples3)
+# results = analyze(data3, Y3)
+# for Si in results[:firstorder]
+#     @test Si <= 1
+# end
+# for CI in results[:firstorder_conf]
+#     @test ismissing(CI) || CI > 0
+# end
+# for S2i in results[:secondorder]
+#     @test ismissing(S2i) || S2i <= 1
+# end
+# for CI in results[:secondorder_conf]
+#     @test ismissing(CI) || CI > 0
+# end
+# for St in results[:totalorder]
+#     @test St <= 1
+# end
+# for CI in results[:totalorder_conf]
+#     @test ismissing(CI) || CI > 0
+# end
+# @test sum(results[:totalorder]) > sum(results[:firstorder])
+
+# ##
+# ## 4b. Analyze Sobol Optional Keyword Args
+# ##
+
+# data = SobolData(
+#     params = OrderedDict(:x1 => Normal(1, 0.2),
+#         :x2 => Uniform(0.75, 1.25),
+#         :x3 => LogNormal(0, 0.5)),
+#     N = 1000
+# )
+# samples = sample(data)
+# Y = ishigami(samples)
+# results = analyze(data, Y)
+
+# @test_throws ErrorException analyze(data, Y; num_resamples = nothing)
+# @test_throws ErrorException analyze(data, Y; conf_level = nothing)
+
+# @test length(analyze(data, Y; num_resamples = nothing, conf_level = nothing)) == 3 # no confidence intervals
+# results = analyze(data, Y; progress_meter = false) # no progress bar should show
+
+# @test length(analyze(data, Y; N_override = 10)) == 6 
+# results_override = analyze(data, Y, N_override = data.N)
+# results_original = analyze(data, Y)
+# @test results_override[:firstorder] == results_original[:firstorder]
+# @test results_override[:totalorder] == results_original[:totalorder] 
+# @test_throws ErrorException analyze(data1, Y1; N_override = data.N + 1) # N_override > N

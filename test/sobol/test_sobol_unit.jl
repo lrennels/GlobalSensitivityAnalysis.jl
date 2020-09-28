@@ -1,10 +1,8 @@
 using Test
 using Distributions
+using DataStructures
 
-include("../../src/utils.jl")
-include("../../src/sample_sobol.jl")
-include("../../src/test_functions/ishigami.jl")
-include("../../src/analyze_sobol.jl")
+import GlobalSensitivityAnalysis: scale_samples!, ishigami, sample
 
 ##
 ## 1. utils
@@ -36,14 +34,6 @@ data3 = SobolData(params = parameters)
 data4 = SobolData(calc_second_order = false)
 data5 = SobolData(N = 100)
 
-# scale_samples!
-seq = rand(100, 8)
-original_seq = copy(seq)
-dists = [Normal(1, 0.2), Uniform(0.75, 1.25), LogNormal(0, 0.5), TriangularDist(0, 4, 1)]
-scale_samples!(seq, dists)
-@test size(seq) == size(original_seq)
-@test seq != original_seq
-
 ##
 ## 2. Sample Sobol
 ##
@@ -69,7 +59,7 @@ end
 @test_throws ErrorException sample(data5) # params are nothing
 
 ##
-## 4a. Analyze Sobol
+## 3a. Analyze Sobol
 ##
 
 Y1 = ishigami(samples)
@@ -111,7 +101,7 @@ end
 @test sum(results[:totalorder]) > sum(results[:firstorder])
 
 ##
-## 4b. Analyze Sobol Optional Keyword Args
+## 3b. Analyze Sobol Optional Keyword Args
 ##
 
 data = SobolData(

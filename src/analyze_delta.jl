@@ -52,7 +52,7 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
         model_output = model_output[1:N]
     end
 
-    M = min(ceil(N ^ (2 / (7 + tanh((1500 - N) / 500)))), 48)
+    M = Int(min(ceil(N ^ (2 / (7 + tanh((1500 - N) / 500)))), 48))
     m = LinRange(0, N, M + 1)
     model_output_grid = LinRange(minimum(model_output), maximum(model_output), 100)
 
