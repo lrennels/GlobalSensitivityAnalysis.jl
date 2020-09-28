@@ -46,7 +46,7 @@ samples3 = sample(data3)
 @test_throws ErrorException sample(data4) # params are nothing
 
 # ##
-# ## 3a. Analyze Delta
+# ## 3a. Analyze Delta (TODO is there anything else we should test indices for?)
 # ##
 
 Y1 = ishigami(samples)
@@ -63,7 +63,6 @@ end
 for CI in results[:delta_conf]
     @test CI > 0 
 end
-# TODO tests on the values
 
 Y3 = ishigami(samples3)
 results = analyze(data3, samples3, Y3)
@@ -79,7 +78,6 @@ end
 for CI in results[:delta_conf]
     @test CI > 0 
 end
-# TODO tests on the values
 
 # ##
 # ## 3b. Analyze Sobol Optional Keyword Args
@@ -95,12 +93,11 @@ samples = sample(data)
 Y = ishigami(samples)
 results = analyze(data, samples, Y)
 
-@test length(analyze(data, samples, Y; conf_level = nothing)) == 3 # no confidence intervals
-results = analyze(data, Y; progress_meter = false) # no progress bar should show
+results = analyze(data, samples, Y; progress_meter = false) # no progress bar should show
+results = analyze(data, samples, Y; num_resamples = 100, conf_level = 0.90, progress_meter = false) # keywords
 
-# @test length(analyze(data, Y; N_override = 10)) == 6 
-# results_override = analyze(data, Y, N_override = data.N)
-# results_original = analyze(data, Y)
-# @test results_override[:firstorder] == results_original[:firstorder]
-# @test results_override[:totalorder] == results_original[:totalorder] 
-# @test_throws ErrorException analyze(data1, Y1; N_override = data.N + 1) # N_override > N
+@test length(analyze(data, samples, Y; N_override = 10)) == 4 
+results_override = analyze(data, samples, Y; N_override = data.N)
+results_original = analyze(data, samples, Y)
+@test results_override[:firstorder] == results_original[:firstorder]
+@test_throws ErrorException analyze(data, samples, Y; N_override = data.N + 1) # N_override > N

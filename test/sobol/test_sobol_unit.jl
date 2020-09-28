@@ -2,7 +2,7 @@ using Test
 using Distributions
 using DataStructures
 
-import GlobalSensitivityAnalysis: scale_samples!, ishigami, sample
+import GlobalSensitivityAnalysis: scale_samples!, ishigami
 
 ##
 ## 1. utils
