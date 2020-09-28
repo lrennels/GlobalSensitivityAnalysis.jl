@@ -5,8 +5,11 @@ using Distributions
 using Statistics
 using Sobol
 
-export
-    sample, analyze, SobolData, DeltaData
+export 
+    sample, 
+    analyze, 
+    SobolData, 
+    DeltaData
 
 include("utils.jl")
 include("sample_sobol.jl")

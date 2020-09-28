@@ -67,7 +67,6 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
     progress_meter ? p = Progress(D, counter, "Calculating indices for $D parameters ...") : nothing
 
     for i in 1:D
-
          # increment progress meter
          counter += 1
          progress_meter ? ProgressMeter.update!(p, counter) : nothing  

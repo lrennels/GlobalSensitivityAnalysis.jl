@@ -46,7 +46,7 @@ samples3 = sample(data3)
 @test_throws ErrorException sample(data4) # params are nothing
 
 # ##
-# ## 4a. Analyze Sobol
+# ## 3a. Analyze Delta
 # ##
 
 Y1 = ishigami(samples)

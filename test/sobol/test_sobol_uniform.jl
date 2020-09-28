@@ -40,22 +40,22 @@ julia_results = analyze(data, convert(Matrix, julia_ishigami); num_resamples = 1
 ################################################################################
 
 # sampling
-py_samples = load("data/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
-py_ishigami = load("data/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
+py_samples = load("data/sobol/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
+py_ishigami = load("data/sobol/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
 
 # analysis
-py_A = load("data/py_uniform/py_A.csv", header_exists=false) |> DataFrame
-py_B = load("data/py_uniform/py_B.csv", header_exists=false) |> DataFrame
-py_AB = load("data/py_uniform/py_AB.csv", header_exists=false) |> DataFrame
-py_BA = load("data/py_uniform/py_BA.csv", header_exists=false) |> DataFrame
+py_A = load("data/sobol/py_uniform/py_A.csv", header_exists=false) |> DataFrame
+py_B = load("data/sobol/py_uniform/py_B.csv", header_exists=false) |> DataFrame
+py_AB = load("data/sobol/py_uniform/py_AB.csv", header_exists=false) |> DataFrame
+py_BA = load("data/sobol/py_uniform/py_BA.csv", header_exists=false) |> DataFrame
 
-py_firstorder = load("data/py_uniform/py_firstorder.csv", header_exists=false) |> DataFrame
-py_secondorder = load("data/py_uniform/py_secondorder.csv", header_exists=false) |> DataFrame
-py_totalorder = load("data/py_uniform/py_totalorder.csv", header_exists=false) |> DataFrame
+py_firstorder = load("data/sobol/py_uniform/py_firstorder.csv", header_exists=false) |> DataFrame
+py_secondorder = load("data/sobol/py_uniform/py_secondorder.csv", header_exists=false) |> DataFrame
+py_totalorder = load("data/sobol/py_uniform/py_totalorder.csv", header_exists=false) |> DataFrame
 
-py_firstorder_conf = load("data/py_uniform/py_firstorder_conf.csv", header_exists=false) |> DataFrame
-py_secondorder_conf = load("data/py_uniform/py_secondorder_conf.csv", header_exists=false) |> DataFrame
-py_totalorder_conf = load("data/py_uniform/py_totalorder_conf.csv", header_exists=false) |> DataFrame
+py_firstorder_conf = load("data/sobol/py_uniform/py_firstorder_conf.csv", header_exists=false) |> DataFrame
+py_secondorder_conf = load("data/sobol/py_uniform/py_secondorder_conf.csv", header_exists=false) |> DataFrame
+py_totalorder_conf = load("data/sobol/py_uniform/py_totalorder_conf.csv", header_exists=false) |> DataFrame
 
 ################################################################################
 ## Testing
