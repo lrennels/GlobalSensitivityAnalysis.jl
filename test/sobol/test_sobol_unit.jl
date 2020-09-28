@@ -114,15 +114,11 @@ samples = sample(data)
 Y = ishigami(samples)
 results = analyze(data, Y)
 
-@test_throws ErrorException analyze(data, Y; num_resamples = nothing)
-@test_throws ErrorException analyze(data, Y; conf_level = nothing)
+results = analyze(data, samples, Y; progress_meter = false) # no progress bar should show
 
-@test length(analyze(data, Y; num_resamples = nothing, conf_level = nothing)) == 3 # no confidence intervals
-results = analyze(data, Y; progress_meter = false) # no progress bar should show
-
-@test length(analyze(data, Y; N_override = 10)) == 6 
-results_override = analyze(data, Y, N_override = data.N)
-results_original = analyze(data, Y)
+@test length(analyze(data, samples, Y; N_override = 10)) == 4 
+results_override = analyze(data, samples, Y, N_override = data.N)
+results_original = analyze(data, samples, Y)
 @test results_override[:firstorder] == results_original[:firstorder]
 @test results_override[:totalorder] == results_original[:totalorder] 
-@test_throws ErrorException analyze(data1, Y1; N_override = data.N + 1) # N_override > N
+@test_throws ErrorException analyze(data1, samples, Y1; N_override = data.N + 1) # N_override > N

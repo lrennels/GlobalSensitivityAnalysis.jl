@@ -54,58 +54,49 @@ results = analyze(data1, samples, Y1)
 for Si in results[:firstorder]
     @test Si <= 1
 end
-# for CI in results[:firstorder_conf]
-#     @test CI > 0 
-# end
-# for St in results[:totalorder]
-#     @test St <= 1
-# end
-# for CI in results[:totalorder_conf]
-#     @test CI > 0 
-# end
-# @test sum(results[:totalorder]) > sum(results[:firstorder])
+for Si in results[:delta]
+    @test Si <= 1
+end
+for CI in results[:firstorder_conf]
+    @test CI > 0 
+end
+for CI in results[:delta_conf]
+    @test CI > 0 
+end
+# TODO tests on the values
 
-# Y3 = ishigami(samples3)
-# results = analyze(data3, Y3)
-# for Si in results[:firstorder]
-#     @test Si <= 1
-# end
-# for CI in results[:firstorder_conf]
-#     @test ismissing(CI) || CI > 0
-# end
-# for S2i in results[:secondorder]
-#     @test ismissing(S2i) || S2i <= 1
-# end
-# for CI in results[:secondorder_conf]
-#     @test ismissing(CI) || CI > 0
-# end
-# for St in results[:totalorder]
-#     @test St <= 1
-# end
-# for CI in results[:totalorder_conf]
-#     @test ismissing(CI) || CI > 0
-# end
-# @test sum(results[:totalorder]) > sum(results[:firstorder])
+Y3 = ishigami(samples3)
+results = analyze(data3, samples3, Y3)
+for Si in results[:firstorder]
+    @test Si <= 1
+end
+for Si in results[:delta]
+    @test Si <= 1
+end
+for CI in results[:firstorder_conf]
+    @test CI > 0 
+end
+for CI in results[:delta_conf]
+    @test CI > 0 
+end
+# TODO tests on the values
 
 # ##
-# ## 4b. Analyze Sobol Optional Keyword Args
+# ## 3b. Analyze Sobol Optional Keyword Args
 # ##
 
-# data = SobolData(
-#     params = OrderedDict(:x1 => Normal(1, 0.2),
-#         :x2 => Uniform(0.75, 1.25),
-#         :x3 => LogNormal(0, 0.5)),
-#     N = 1000
-# )
-# samples = sample(data)
-# Y = ishigami(samples)
-# results = analyze(data, Y)
+data = DeltaData(
+    params = OrderedDict(:x1 => Normal(1, 0.2),
+        :x2 => Uniform(0.75, 1.25),
+        :x3 => LogNormal(0, 0.5)),
+    N = 1000
+)
+samples = sample(data)
+Y = ishigami(samples)
+results = analyze(data, samples, Y)
 
-# @test_throws ErrorException analyze(data, Y; num_resamples = nothing)
-# @test_throws ErrorException analyze(data, Y; conf_level = nothing)
-
-# @test length(analyze(data, Y; num_resamples = nothing, conf_level = nothing)) == 3 # no confidence intervals
-# results = analyze(data, Y; progress_meter = false) # no progress bar should show
+@test length(analyze(data, samples, Y; conf_level = nothing)) == 3 # no confidence intervals
+results = analyze(data, Y; progress_meter = false) # no progress bar should show
 
 # @test length(analyze(data, Y; N_override = 10)) == 6 
 # results_override = analyze(data, Y, N_override = data.N)

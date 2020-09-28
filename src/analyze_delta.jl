@@ -3,6 +3,8 @@ using Distributions
 using ProgressMeter
 using KernelDensity
 using NumericalIntegration
+using StatsBase
+
 # QuadGK.jl
 # Trapz.jl 
 
@@ -20,7 +22,7 @@ References
 =#
 
 """
-    analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, model_output::AbstractArray{<:Number, S2}; num_resamples::Int = 1_000, conf_level::Number = 0.95) where S1 where S2 
+    analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, model_output::AbstractArray{<:Number, S2}; num_resamples::Int = 1_000, conf_level::Number = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S1 where S2 
 
 Performs a Delta Moment-Independent Analysis on the `model_output` produced with 
 the problem defined by the information in `data` and `model_input` and returns
@@ -39,6 +41,12 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
     # number of resamples
     # conf_flag = _check_conf_flag(num_resamples, conf_level)
 
+    if size(model_output, 2) != 1
+        error("Model output for analyzing DeltaData has more than one col, not handled yet.")
+    else
+        model_output = vec(model_output)
+    end
+
     # define constants
     D = length(data.params) # number of uncertain parameters in problem
     # deal with overriding N
@@ -53,8 +61,8 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
     end
 
     M = Int(min(ceil(N ^ (2 / (7 + tanh((1500 - N) / 500)))), 48))
-    m = LinRange(0, N, M + 1)
-    model_output_grid = LinRange(minimum(model_output), maximum(model_output), 100)
+    m = collect(LinRange(0, N, M + 1))
+    model_output_grid = collect(LinRange(minimum(model_output), maximum(model_output), 100))
 
     # preallocate arrays 
     delta = Array{Float64}(undef, D)
@@ -67,9 +75,9 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
     progress_meter ? p = Progress(D, counter, "Calculating indices for $D parameters ...") : nothing
 
     for i in 1:D
-         # increment progress meter
-         counter += 1
-         progress_meter ? ProgressMeter.update!(p, counter) : nothing  
+        # increment progress meter
+        counter += 1
+        progress_meter ? ProgressMeter.update!(p, counter) : nothing  
         
         delta[i], delta_conf = bias_reduced_delta(model_output, model_output_grid, model_input[:,i], m, num_resamples, conf_level)
         firstorder[i] = sobol_first(model_output, model_input[:,i], m)
@@ -86,38 +94,38 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
 end
 
 """
-    calc_delta(model_output::AbstractArray{<:Number, S2}, model_output_grid::LinRange, 
-        model_input::AbstractArray{<:Number, S1}, m::LinRange) where S1 where S2
+    calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
+        model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
 
-Plischke et al. 2013 estimator (eqn 26) for d_hat
+    Plischke et al. 2013 estimator (eqn 26) for d_hat
 """
-function calc_delta(model_output::AbstractArray{<:Number, S2}, model_output_grid::LinRange, model_input::AbstractArray{<:Number, S1}, m::LinRange) where S1 where S2
+function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
     N = length(model_output)
     k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib
     fy = pdf(k, model_output_grid)
-    model_output_ranks = collect(1:1:length(model_input))
+    model_input_ranks = ordinalrank(model_input)
 
     d_hat = 0
-    for j = 1:length(m) - m
-        mask = (model_output_ranks .> m[j]) .& (model_output_ranks .<= m[j + 1])
-        ix = (model_output_ranks[mask])
+    for j = 1:length(m) - 1
+        mask = (model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1])
+        ix = model_input_ranks[mask]
         nm = length(ix)
         k = kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
         fyc = pdf(k, model_output_grid)
-        d_hat += (nm / (2 * N)) * NumericalIntegration.integrate(abs(fy - fyc), model_output_grid, NumericalIntegration.TrapezoidalEven())
+        d_hat += (nm / (2 * N)) * NumericalIntegration.integrate(abs.(fy - fyc), model_output_grid, NumericalIntegration.TrapezoidalEven())
     end
     return d_hat
 
 end
 
 """
-    bias_reduced_delta(model_output::AbstractArray{<:Number, S2}, model_output_grid::LinRange, 
-        model_input::AbstractArray{<:Number, S1}, m::LinRange, num_resamples::Int, 
+    bias_reduced_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
+        model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}, num_resamples::Int, 
         conf_level::Number) where S1 where S2
 
 Plischke et al. 2013 bias reduction technique (eqn 30)
 """
-function bias_reduced_delta(model_output::AbstractArray{<:Number, S2}, model_output_grid::LinRange, model_input::AbstractArray{<:Number, S1}, m::LinRange, num_resamples::Int, conf_level::Number) where S1 where S2
+function bias_reduced_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
     d = zeros(num_resamples)
     d_hat = calc_delta(model_output, model_output_grid, model_input, m)
 
@@ -126,25 +134,25 @@ function bias_reduced_delta(model_output::AbstractArray{<:Number, S2}, model_out
         d[i] = calc_delta(model_output[r], model_output_grid, model_input[r], m)
     end
 
-    d = 2 * d_hat - d
+    d = 2 * d_hat .- d
     Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2)
 
     return (mean(d), Z * std(d))
 end
 
 """
-    sobol_first(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, 
-        m::LinRange) where S1 where S2
+    sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::AbstractArray{<:Number, S2}, 
+        m::AbstractArray{<:Number, 1}) where S1 where S2
 
 Definition ...
 """
-function sobol_first(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, m::LinRange) where S1 where S2
-    model_output_ranks = collect(1:1:length(model_input))
+function sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
+    model_input_ranks = ordinalrank(model_input)
     Vi = 0
     N = length(model_output)
     for j in 1:length(m) - 1
-        mask = (model_output_ranks .> m[j]) .& (model_output_ranks .<= m[j + 1])
-        ix = (model_output_ranks[mask])
+        mask = (model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1])
+        ix = (model_input_ranks[mask])
         nm = length(ix)
         Vi += (nm / N) * ((mean(model_output[ix]) - mean(model_output))^2)
     end
@@ -155,12 +163,11 @@ end
 
 """
     sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, 
-        m::LinRange, num_resamples::Int, conf_level::Number) where S1 where S2
+        m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
 
 Definition ...
 """
-
-function sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, m::LinRange, num_resamples::Int, conf_level::Number) where S1 where S2
+function sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
     s = zeros(num_resamples)
     Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2)
 
