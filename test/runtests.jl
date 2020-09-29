@@ -1,4 +1,5 @@
 using Test
+using GlobalSensitivityAnalysis
 
 @testset "Compare to SALib.py" begin
     include("test_sobolsequence.jl")
