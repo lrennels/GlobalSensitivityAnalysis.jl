@@ -3,7 +3,7 @@ using DataStructures
 using DataFrames
 using Test
 
-import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order
+import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order, sample
 
 @testset "Sobol CI" begin
 

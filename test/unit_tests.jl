@@ -1,7 +1,7 @@
 using Test
 using Distributions
 
-import GlobalSensitivityAnalysis: scale_sobol_seq!
+import GlobalSensitivityAnalysis: scale_sobol_seq!, sample
 
 ##
 ## 1. utils

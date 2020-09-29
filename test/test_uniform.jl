@@ -4,7 +4,7 @@ using DataFrames
 using CSVFiles
 using DataStructures
 
-import GlobalSensitivityAnalysis: ishigami, split_output
+import GlobalSensitivityAnalysis: ishigami, split_output, sample
 
 ################################################################################
 ## SET CONSTANTS
