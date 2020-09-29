@@ -5,8 +5,6 @@ using DataStructures
 using Sobol
 using Distributions
 
-include("../src/utils.jl")
-
 # define the (uncertain) parameters of the problem and their distributions
 # (this data was used for the pre-computed py_sobolseq)
 data = SobolData(

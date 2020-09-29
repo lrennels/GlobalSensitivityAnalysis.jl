@@ -1,10 +1,7 @@
 using Test
 using Distributions
 
-include("../src/utils.jl")
-include("../src/sample_sobol.jl")
-include("../src/test_functions/ishigami.jl")
-include("../src/analyze_sobol.jl")
+import GlobalSensitivityAnalysis: scale_sobol_seq!
 
 ##
 ## 1. utils
