@@ -21,8 +21,8 @@ end
 @testset "Test Delta Method" begin
 
     @testset "Compare to SALib.py" begin
-        # TODO
-    end
+    include("delta/test_delta_uniform.jl")
+end
 
     @testset "Unit Testing" begin
         include("delta/test_delta_unit.jl")
