@@ -3,12 +3,16 @@ using Distributions
 using ProgressMeter
 using KernelDensity
 using NumericalIntegration
-using StatsBase
+import StatsBase: ordinalrank
 
+# TODO pick best trapz type function package
 # QuadGK.jl
 # Trapz.jl 
 
-# TODO pick best trapz type function package
+# TODO there are bugs here that have to do with the use of the KernelDensity
+# and NumericalIntegration packages ... the d-hat from calc_delta doesn't 
+# come out properly ... it doesn't even change!
+
 #=
 References
 ----------
@@ -110,7 +114,7 @@ function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid
         mask = (model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1])
         ix = model_input_ranks[mask]
         nm = length(ix)
-        k = kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
+        k = KernelDensity.kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
         fyc = pdf(k, model_output_grid)
         d_hat += (nm / (2 * N)) * NumericalIntegration.integrate(abs.(fy - fyc), model_output_grid, NumericalIntegration.TrapezoidalEven())
     end

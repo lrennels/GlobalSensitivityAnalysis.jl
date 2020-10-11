@@ -38,7 +38,7 @@ data5 = SobolData(N = 100)
 ## 2. Sample Sobol
 ##
 
-samples = sample(data1)
+samples = GlobalSensitivityAnalysis.sample(data1)
 @test size(samples, 2) == length(data1.params)
 if data1.calc_second_order
     @test size(samples,1) == data1.N * (2 * length(data1.params) + 2)
@@ -46,7 +46,7 @@ else
     @test size(samples,1) == data1.N * (length(data1.params) + 2)
 end
 
-samples3 = sample(data3)
+samples3 = GlobalSensitivityAnalysis.sample(data3)
 @test size(samples3, 2) == length(data3.params)
 if data3.calc_second_order
     @test size(samples3,1) == data3.N * (2 * length(data3.params) + 2)
@@ -54,9 +54,9 @@ else
     @test size(samples3,1) == data3.N * (length(data3.params) + 2)
 end
 
-@test_throws ErrorException sample(data2) # params are nothing
-@test_throws ErrorException sample(data4) # params are nothing
-@test_throws ErrorException sample(data5) # params are nothing
+@test_throws ErrorException GlobalSensitivityAnalysis.sample(data2) # params are nothing
+@test_throws ErrorException GlobalSensitivityAnalysis.sample(data4) # params are nothing
+@test_throws ErrorException GlobalSensitivityAnalysis.sample(data5) # params are nothing
 
 ##
 ## 3a. Analyze Sobol
@@ -110,15 +110,15 @@ data = SobolData(
         :x3 => LogNormal(0, 0.5)),
     N = 1000
 )
-samples = sample(data)
+samples = GlobalSensitivityAnalysis.sample(data)
 Y = ishigami(samples)
 results = analyze(data, Y)
 
-results = analyze(data, samples, Y; progress_meter = false) # no progress bar should show
+results = analyze(data, Y; progress_meter = false) # no progress bar should show
 
-@test length(analyze(data, samples, Y; N_override = 10)) == 4 
-results_override = analyze(data, samples, Y, N_override = data.N)
-results_original = analyze(data, samples, Y)
+@test length(analyze(data, Y; N_override = 10)) == 6
+results_override = analyze(data, Y, N_override = data.N)
+results_original = analyze(data, Y)
 @test results_override[:firstorder] == results_original[:firstorder]
 @test results_override[:totalorder] == results_original[:totalorder] 
-@test_throws ErrorException analyze(data1, samples, Y1; N_override = data.N + 1) # N_override > N
+@test_throws ErrorException analyze(data1, Y1; N_override = data.N + 1) # N_override > N

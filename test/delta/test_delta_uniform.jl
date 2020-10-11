@@ -33,7 +33,11 @@ end
 
     # Get the samples
     samples = load("data/delta/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
-    Y = load("data/delta/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
+    
+    # check ishigami
+    python_Y = load("data/delta/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
+    julia_Y = ishigami(convert(Array, samples))
+    @test python_Y[:1] ≈ julia_Y atol = ATOL
 
     # julia results
     julia_results = analyze(data, convert(Array, samples), convert(Matrix, Y); num_resamples = 1_000) 

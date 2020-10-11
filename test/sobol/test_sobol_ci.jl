@@ -31,7 +31,7 @@ data = SobolData(
 D = length(data.params)
 
 # run sampling since this is deterministic
-samples = sample(data) # generate samples using Sobol sequence
+samples = GlobalSensitivityAnalysis.sample(data) # generate samples using Sobol sequence
 Y = ishigami(samples) # run model (example)
 
 # iteratively perform Sobol Analysis and save confidence intervals
@@ -69,7 +69,7 @@ data = SobolData(
 D = length(data.params)
 
 # run sampling since this is deterministic
-samples = sample(data) # generate samples using Sobol sequence
+samples = GlobalSensitivityAnalysis.sample(data) # generate samples using Sobol sequence
 Y = ishigami(samples) # run model (example)
 
 # iteratively perform Sobol Analysis and save confidence intervals
@@ -105,7 +105,7 @@ data = SobolData(
 D = length(data.params)
 
 # sampling
-samples = sample(data) |> DataFrame
+samples = GlobalSensitivityAnalysis.sample(data) |> DataFrame
 Y = ishigami(convert(Matrix, samples)) |> DataFrame
 
 # analysis
