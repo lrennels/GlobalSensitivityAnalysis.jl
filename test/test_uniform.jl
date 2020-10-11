@@ -4,6 +4,8 @@ using DataFrames
 using CSVFiles
 using DataStructures
 
+import GlobalSensitivityAnalysis: ishigami, split_output, sample
+
 ################################################################################
 ## SET CONSTANTS
 ################################################################################
@@ -13,10 +15,6 @@ ATOL_CI = 1e-2
 ################################################################################
 ## JULIA
 ################################################################################
-include("../src/utils.jl")
-include("../src/sample_sobol.jl")
-include("../src/analyze_sobol.jl")
-include("../src/test_functions/ishigami.jl")
 
 # define the (uncertain) parameters of the problem and their distributions
 data = SobolData(
