@@ -23,6 +23,8 @@ end
 
     @testset "Compare to SALib.py" begin
     include("delta/test_delta_uniform.jl")
+    # include("delta/test_delta_nonuniform.jl") TODO
+    # include("delta/test_delta_ci.jl") TODO
 end
 
     @testset "Unit Testing" begin

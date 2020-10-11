@@ -11,6 +11,7 @@ import GlobalSensitivityAnalysis: ishigami
 ################################################################################
 
 ATOL = 1e-9
+ATOL_IDX = 1e-1
 ATOL_CI = 1e-2
 
 # define the (uncertain) parameters of the problem and their distributions
@@ -28,7 +29,6 @@ D = length(data.params)
     # TODO
 end
 
-
 @testset "Uniform Analysis" begin
 
     # Get the samples
@@ -37,10 +37,10 @@ end
     # check ishigami
     python_Y = load("data/delta/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
     julia_Y = ishigami(convert(Array, samples))
-    @test python_Y[:1] ≈ julia_Y atol = ATOL
+    @test python_Y[:,1] ≈ julia_Y atol = ATOL
 
     # julia results
-    julia_results = analyze(data, convert(Array, samples), convert(Matrix, Y); num_resamples = 1_000) 
+    julia_results = analyze(data, convert(Array, samples), julia_Y; num_resamples = 1_000) 
 
     # python results
     py_firstorder = load("data/delta/py_uniform/py_firstorder.csv", header_exists=false) |> DataFrame
@@ -49,8 +49,8 @@ end
     py_delta_conf = load("data/delta/py_uniform/py_delta_conf.csv", header_exists=false) |> DataFrame
 
     # test indices
-    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL
-    @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = ATOL
+    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_IDX
+    @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = ATOL_IDX
 
     # test confidence intervals
     @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI

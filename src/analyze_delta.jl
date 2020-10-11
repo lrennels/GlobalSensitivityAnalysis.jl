@@ -5,14 +5,6 @@ using KernelDensity
 using NumericalIntegration
 import StatsBase: ordinalrank
 
-# TODO pick best trapz type function package
-# QuadGK.jl
-# Trapz.jl 
-
-# TODO there are bugs here that have to do with the use of the KernelDensity
-# and NumericalIntegration packages ... the d-hat from calc_delta doesn't 
-# come out properly ... it doesn't even change!
-
 #=
 References
 ----------
@@ -83,7 +75,7 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
         counter += 1
         progress_meter ? ProgressMeter.update!(p, counter) : nothing  
         
-        delta[i], delta_conf = bias_reduced_delta(model_output, model_output_grid, model_input[:,i], m, num_resamples, conf_level)
+        delta[i], delta_conf[i] = bias_reduced_delta(model_output, model_output_grid, model_input[:,i], m, num_resamples, conf_level)
         firstorder[i] = sobol_first(model_output, model_input[:,i], m)
         firstorder_conf[i] = sobol_first_conf(model_output, model_input[:,i], m, num_resamples, conf_level)
     end
@@ -111,12 +103,11 @@ function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid
 
     d_hat = 0
     for j = 1:length(m) - 1
-        mask = (model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1])
-        ix = model_input_ranks[mask]
+        ix = findall((model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1]))
         nm = length(ix)
         k = KernelDensity.kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
         fyc = pdf(k, model_output_grid)
-        d_hat += (nm / (2 * N)) * NumericalIntegration.integrate(abs.(fy - fyc), model_output_grid, NumericalIntegration.TrapezoidalEven())
+        d_hat += (nm / (2 * N)) * integrate(abs.(fy - fyc), sort(model_output_grid, rev = true))
     end
     return d_hat
 
@@ -155,8 +146,7 @@ function sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::Abs
     Vi = 0
     N = length(model_output)
     for j in 1:length(m) - 1
-        mask = (model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1])
-        ix = (model_input_ranks[mask])
+        ix = findall((model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1]))
         nm = length(ix)
         Vi += (nm / N) * ((mean(model_output[ix]) - mean(model_output))^2)
     end
