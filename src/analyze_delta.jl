@@ -54,6 +54,7 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
 
         # reduce the output to just what should be considered for this N
         model_output = model_output[1:N]
+        model_input = model_input[1:N,:]
     end
 
     M = Int(min(ceil(N ^ (2 / (7 + tanh((1500 - N) / 500)))), 48))
