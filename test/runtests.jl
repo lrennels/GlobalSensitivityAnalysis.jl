@@ -1,4 +1,5 @@
 using Test
+using GlobalSensitivityAnalysis
 
 @testset "Test Utils" begin
     include("test_utils.jl")

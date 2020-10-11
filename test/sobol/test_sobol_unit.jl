@@ -2,7 +2,7 @@ using Test
 using Distributions
 using DataStructures
 
-import GlobalSensitivityAnalysis: scale_samples!, ishigami
+import GlobalSensitivityAnalysis: scale_samples!, ishigami, sample
 
 ##
 ## 1. utils
@@ -38,7 +38,7 @@ data5 = SobolData(N = 100)
 ## 2. Sample Sobol
 ##
 
-samples = GlobalSensitivityAnalysis.sample(data1)
+samples = sample(data1)
 @test size(samples, 2) == length(data1.params)
 if data1.calc_second_order
     @test size(samples,1) == data1.N * (2 * length(data1.params) + 2)
@@ -46,7 +46,7 @@ else
     @test size(samples,1) == data1.N * (length(data1.params) + 2)
 end
 
-samples3 = GlobalSensitivityAnalysis.sample(data3)
+samples3 = sample(data3)
 @test size(samples3, 2) == length(data3.params)
 if data3.calc_second_order
     @test size(samples3,1) == data3.N * (2 * length(data3.params) + 2)
@@ -54,9 +54,9 @@ else
     @test size(samples3,1) == data3.N * (length(data3.params) + 2)
 end
 
-@test_throws ErrorException GlobalSensitivityAnalysis.sample(data2) # params are nothing
-@test_throws ErrorException GlobalSensitivityAnalysis.sample(data4) # params are nothing
-@test_throws ErrorException GlobalSensitivityAnalysis.sample(data5) # params are nothing
+@test_throws ErrorException sample(data2) # params are nothing
+@test_throws ErrorException sample(data4) # params are nothing
+@test_throws ErrorException sample(data5) # params are nothing
 
 ##
 ## 3a. Analyze Sobol
@@ -110,7 +110,7 @@ data = SobolData(
         :x3 => LogNormal(0, 0.5)),
     N = 1000
 )
-samples = GlobalSensitivityAnalysis.sample(data)
+samples = sample(data)
 Y = ishigami(samples)
 results = analyze(data, Y)
 

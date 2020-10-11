@@ -3,7 +3,7 @@ using DataStructures
 using DataFrames
 using Test
 
-import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order
+import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order, sample
 #
 # STEP 1. try running confidence intervals a few times and looking at the variance etc. 
 # and then compare that to doing the same for Python SALib 
@@ -31,7 +31,7 @@ data = SobolData(
 D = length(data.params)
 
 # run sampling since this is deterministic
-samples = GlobalSensitivityAnalysis.sample(data) # generate samples using Sobol sequence
+samples = sample(data) # generate samples using Sobol sequence
 Y = ishigami(samples) # run model (example)
 
 # iteratively perform Sobol Analysis and save confidence intervals
@@ -69,7 +69,7 @@ data = SobolData(
 D = length(data.params)
 
 # run sampling since this is deterministic
-samples = GlobalSensitivityAnalysis.sample(data) # generate samples using Sobol sequence
+samples = sample(data) # generate samples using Sobol sequence
 Y = ishigami(samples) # run model (example)
 
 # iteratively perform Sobol Analysis and save confidence intervals
@@ -105,7 +105,7 @@ data = SobolData(
 D = length(data.params)
 
 # sampling
-samples = GlobalSensitivityAnalysis.sample(data) |> DataFrame
+samples = sample(data) |> DataFrame
 Y = ishigami(convert(Matrix, samples)) |> DataFrame
 
 # analysis

@@ -4,7 +4,7 @@ using DataFrames
 using CSVFiles
 using DataStructures
 
-import GlobalSensitivityAnalysis: ishigami, split_output
+import GlobalSensitivityAnalysis: ishigami, split_output, sample
 
 ################################################################################
 ## SET CONSTANTS
@@ -28,7 +28,7 @@ N = data.N
 D = length(data.params)
 
 # sampling
-julia_samples = GlobalSensitivityAnalysis.sample(data) |> DataFrame
+julia_samples = sample(data) |> DataFrame
 julia_ishigami = ishigami(convert(Matrix, julia_samples)) |> DataFrame
 
 # save this DataFrame for Mimi Testing
