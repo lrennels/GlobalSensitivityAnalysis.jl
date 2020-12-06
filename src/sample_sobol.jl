@@ -25,7 +25,8 @@ Generate a matrix containing the model inputs for Sobol sensitivity analysis wit
 the information in the `data`. In this function we apply Saltelli's 
 extension of the Sobol  sequence. Saltelli's scheme extends the Sobol sequence in 
 a way to reduce the error rates in the resulting sensitivity index calculations. 
-The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters 
+The resulting matrix has `N` * (2`D` + 2) rows when second order indices are calculated,
+and `N` * (`D` + 2) when this calculation is omitted, where `D` is the number of parameters 
 and `N` is the number of samples.
 """
 function sample(data::SobolData)
