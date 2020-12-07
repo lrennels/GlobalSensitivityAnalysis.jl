@@ -20,7 +20,7 @@ References
 =#
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
+    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
@@ -31,7 +31,7 @@ keyword argument indicates whether a progress meter will be displayed and defaul
 to true. The `N_override` keyword argument allows users to override the `N` used in
 a specific `analyze` call to analyze just a subset (useful for convergence graphs).
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 10_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
+function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
 
     # handle confidence interval flag
     num_nothings = (num_resamples === nothing) + (conf_level === nothing)

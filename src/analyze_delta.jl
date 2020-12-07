@@ -139,8 +139,6 @@ end
 """
     sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::AbstractArray{<:Number, S2}, 
         m::AbstractArray{<:Number, 1}) where S1 where S2
-
-Definition ...
 """
 function sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
     model_input_ranks = ordinalrank(model_input)
@@ -159,8 +157,6 @@ end
 """
     sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, 
         m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
-
-Definition ...
 """
 function sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
     s = zeros(num_resamples)
