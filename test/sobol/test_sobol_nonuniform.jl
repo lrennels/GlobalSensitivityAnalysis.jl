@@ -14,7 +14,7 @@ import GlobalSensitivityAnalysis: ishigami, split_output, sample
 data = SobolData(
     params = OrderedDict(:x1 => Normal(1, 0.2),
         :x2 => Uniform(0.75, 1.25),
-        :x3 => LogNormal(0, 0.5)),
+        :x3 => TriangularDist(0.0, 1.0, 0.75)),
     N = 1000
 )
 
@@ -80,7 +80,7 @@ end
         end
     end
 
-    # test confidence intervals (using rtol here, big values throw things off)
+    # test confidence intervals
     @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
     @test julia_results[:totalorder_conf] ≈ convert(Matrix, py_totalorder_conf) atol = ATOL_CI
 

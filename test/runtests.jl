@@ -25,9 +25,8 @@ end
 @testset "Test Delta Method" begin
 
     ATOL = 1e-9
-    ATOL_IDX = 1e-1
+    ATOL_IDX = 1e-3 
     ATOL_CI = 1e-2
-    ATOL_SAMPLE = 1e-2
 
     @testset "Compare to SALib.py" begin
         include("delta/test_delta_uniform.jl")
