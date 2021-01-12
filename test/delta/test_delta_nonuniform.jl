@@ -51,7 +51,7 @@ D = length(data.params)
         results = pb2gen(sampleA, sampleB, quantiles = quants) |> DataFrame
         save(joinpath(output_dir, "LHS Sampling Quantile Comparison N$(N)_p$i.csv"), results)
 
-        @test sum(results[:signif]) == 0
+        @test sum(results[!,:signif]) == 0
     end
 
 end
@@ -77,10 +77,10 @@ end
 
     # test indices
     @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_delta
-    @test ordinalrank(julia_results[:firstorder]) == ordinalrank(py_firstorder[:Column1])
+    @test ordinalrank(julia_results[:firstorder]) == ordinalrank(py_firstorder[!,:Column1])
 
     @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = 0.05 # TODO - this seems too high?
-    @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[:Column1])
+    @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[!,:Column1])
 
     # test confidence intervals
     @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
