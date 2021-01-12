@@ -108,7 +108,7 @@ function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid
         nm = length(ix)
         k = KernelDensity.kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
         fyc = pdf(k, model_output_grid)
-        d_hat += (nm / (2 * N)) * integrate(abs.(fy - fyc), sort(model_output_grid, rev = true))
+        d_hat += (nm / (2 * N)) * integrate(model_output_grid, abs.(fy - fyc), Trapezoidal())
     end
     return d_hat
 

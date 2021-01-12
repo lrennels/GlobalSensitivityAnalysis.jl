@@ -5,7 +5,7 @@ using DataStructures
 import GlobalSensitivityAnalysis: ishigami, sample
 
 ##
-## 1. utils
+## 1. Utils
 ##
 
 # DeltaData
@@ -46,7 +46,7 @@ samples3 = sample(data3)
 @test_throws ErrorException sample(data4) # params are nothing
 
 # ##
-# ## 3a. Analyze Delta (TODO is there anything else we should test indices for?)
+# ## 3a. Analyze Delta - Indices (TODO is there anything else we should test indices for?)
 # ##
 
 Y1 = ishigami(samples)
@@ -80,7 +80,7 @@ for CI in results[:delta_conf]
 end
 
 # ##
-# ## 3b. Analyze Sobol Optional Keyword Args
+# ## 3b. Analyze Delta - Optional Keyword Args
 # ##
 
 data = DeltaData(

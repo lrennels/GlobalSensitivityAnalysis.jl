@@ -78,12 +78,10 @@ end
 
     # test indices
     @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_IDX
-    @test ordinalrank(julia_results[:firstorder]) == ordinalrank(py_firstorder[:Column1])
-    # @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = ATOL_IDX TODO!!
-    # @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[:Column1])
+    # @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = ATOL_IDX TODO
 
     # test confidence intervals
     @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
-    # @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI TODO!!
+    # @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI TODO
 
 end

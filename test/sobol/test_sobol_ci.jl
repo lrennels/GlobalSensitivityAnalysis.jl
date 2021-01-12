@@ -5,7 +5,7 @@ using Test
 
 import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order, sample
 #
-# STEP 1. try running confidence intervals a few times and looking at the variance etc. 
+# STEP 1. try running confidence intervals a few times and looking at the means etc. 
 # and then compare that to doing the same for Python SALib 
 #
 
@@ -91,7 +91,6 @@ end
 
 # define problem and constants
 N = 5
-num_resamples = 3
 conf_level = 0.95
 calc_second_order = false
 

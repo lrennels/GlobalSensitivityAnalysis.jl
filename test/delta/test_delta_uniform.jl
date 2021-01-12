@@ -12,7 +12,7 @@ import StatsBase: ordinalrank
 ## SETUP
 ################################################################################
 
-
+# see: https://www.nature.com/articles/sdata2018187#Sec5
 include(joinpath(@__DIR__, "../../src/quantile_matching/WRS.jl"))
 using .WRS
 
@@ -27,11 +27,10 @@ data = DeltaData(
 N = data.N
 D = length(data.params)
 
-# see: https://www.nature.com/articles/sdata2018187#Sec5
 @testset "Uniform Sampling" begin
 
     py_samples = convert(Matrix, load("data/delta/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame)
-    julia_samples = sample(data) 
+    julia_samples = GlobalSensitivityAnalysis.sample(data) 
 
     quants = [0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99]
     sig_level = 0.05
@@ -64,7 +63,8 @@ end
 
 @testset "Uniform Analysis" begin
 
-    # Get the samples
+    # Get the samples - here we will use the Python samples to keep things consistent,
+    # could also use Julia samples run through both the SALib and GSA functions
     samples = load("data/delta/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
     
     # check ishigami
@@ -81,14 +81,15 @@ end
     py_firstorder_conf = load("data/delta/py_uniform/py_firstorder_conf.csv", header_exists=false) |> DataFrame
     py_delta_conf = load("data/delta/py_uniform/py_delta_conf.csv", header_exists=false) |> DataFrame
 
-    # test indices
+    # test indices - check values and orderings
     @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_IDX
     @test ordinalrank(julia_results[:firstorder]) == ordinalrank(py_firstorder[:Column1])
-    # @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = ATOL_IDX TODO!!
-    # @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[:Column1])
+
+    # @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = ATOL_IDX (TODO)
+    @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[:Column1])
 
     # test confidence intervals
     @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
-    # @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI TODO!!
+    @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI
 
 end
