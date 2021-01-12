@@ -56,7 +56,6 @@ D = length(data.params)
 
 end
 
-
 @testset "Non-Uniform Analysis" begin
 
     # Get the samples
@@ -65,7 +64,7 @@ end
     # check ishigami
     python_Y = load("data/delta/py_nonuniform/py_ishigami.csv", header_exists=false) |> DataFrame
     julia_Y = ishigami(convert(Array, samples))
-    @test python_Y[:,1] ≈ julia_Y atol = ATOL
+    @test python_Y[:,1] ≈ julia_Y atol = ATOL_sample
 
     # julia results
     julia_results = analyze(data, convert(Array, samples), julia_Y; num_resamples = 1_000) 
@@ -77,11 +76,14 @@ end
     py_delta_conf = load("data/delta/py_nonuniform/py_delta_conf.csv", header_exists=false) |> DataFrame
 
     # test indices
-    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_IDX
-    # @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = ATOL_IDX TODO
+    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_delta
+    @test ordinalrank(julia_results[:firstorder]) == ordinalrank(py_firstorder[:Column1])
+
+    @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = 0.05 # TODO - this seems too high?
+    @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[:Column1])
 
     # test confidence intervals
     @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
-    # @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI TODO
+    @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI
 
 end

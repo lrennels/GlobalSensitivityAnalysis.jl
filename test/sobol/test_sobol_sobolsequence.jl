@@ -23,5 +23,5 @@ Sobol_sobolseq = vcat(zeros(1,D), hcat([Sobol.next!(s) for i = 1:N-1]...)') # So
 py_sobolseq = load("data/sobol/py_uniform/py_sobolseq.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
 
 @testset "Sobol Sequence" begin
-    @test convert(Matrix, Sobol_sobolseq)  ≈ convert(Matrix, py_sobolseq)  atol = ATOL
+    @test convert(Matrix, Sobol_sobolseq)  ≈ convert(Matrix, py_sobolseq)  atol = ATOL_sobol
 end

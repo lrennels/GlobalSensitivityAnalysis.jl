@@ -60,23 +60,23 @@ py_totalorder_conf = load("data/sobol/py_nonuniform/py_totalorder_conf.csv", hea
 ################################################################################
 
 @testset "Non-Uniform Sampling" begin
-    @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = ATOL
+    @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = ATOL_sobol
 end
 
 @testset "Non-Uniform Analysis" begin
     
-    @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) atol = ATOL
-    @test julia_A ≈ convert(Matrix, py_A) atol = ATOL
-    @test julia_B ≈ convert(Matrix, py_B) atol = ATOL
-    @test julia_AB ≈ convert(Matrix, py_AB) atol = ATOL
-    @test julia_BA ≈ convert(Matrix, py_BA) atol = ATOL
+    @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) atol = ATOL_sobol
+    @test julia_A ≈ convert(Matrix, py_A) atol = ATOL_sobol
+    @test julia_B ≈ convert(Matrix, py_B) atol = ATOL_sobol
+    @test julia_AB ≈ convert(Matrix, py_AB) atol = ATOL_sobol
+    @test julia_BA ≈ convert(Matrix, py_BA) atol = ATOL_sobol
 
-    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL
-    @test julia_results[:totalorder]≈ convert(Matrix, py_totalorder) atol = ATOL
+    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_sobol
+    @test julia_results[:totalorder]≈ convert(Matrix, py_totalorder) atol = ATOL_sobol
 
     for i = 1:D
         for j = i+1:D
-            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = ATOL
+            @test julia_results[:secondorder][i,j] ≈ convert(Matrix, py_secondorder)[i,j] atol = ATOL_sobol
         end
     end
 

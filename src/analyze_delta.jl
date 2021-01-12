@@ -63,9 +63,9 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
 
     # preallocate arrays 
     delta = Array{Float64}(undef, D)
+    delta_conf = Array{Float64}(undef, D)
     firstorder = Array{Float64}(undef, D)
     firstorder_conf = Array{Float64}(undef, D)
-    delta_conf = Array{Float64}(undef, D)
 
     # set up progress meter
     counter = 0
@@ -108,10 +108,10 @@ function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid
         nm = length(ix)
         k = KernelDensity.kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
         fyc = pdf(k, model_output_grid)
-        d_hat += (nm / (2 * N)) * integrate(model_output_grid, abs.(fy - fyc), Trapezoidal())
+        d_hat += (nm / (2 * N)) * integrate(model_output_grid, abs.(fy - fyc)) #  Trapezoidal() is default function
     end
     return d_hat
-
+    
 end
 
 """

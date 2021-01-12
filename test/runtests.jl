@@ -1,14 +1,16 @@
 using Test
 using GlobalSensitivityAnalysis
 
+ATOL_sample = 1e-9
+ATOL_sobol = 1e-9 # sobol method indices
+ATOL_delta = 1e-3 # delta method indices
+ATOL_CI = 1e-2
+
 @testset "Test Utils" begin
     include("test_utils.jl")
 end
 
 @testset "Test Sobol Method" begin
-
-    ATOL = 1e-9
-    ATOL_CI = 1e-2
 
     @testset "Compare to SALib.py" begin
         include("sobol/test_sobol_sobolsequence.jl")
@@ -24,14 +26,9 @@ end
 
 @testset "Test Delta Method" begin
 
-    ATOL = 1e-9
-    ATOL_IDX = 1e-3 
-    ATOL_CI = 1e-2
-
     @testset "Compare to SALib.py" begin
         include("delta/test_delta_uniform.jl")
         include("delta/test_delta_nonuniform.jl")
-        include("delta/test_delta_ci.jl")
     end
 
     @testset "Unit Testing" begin
