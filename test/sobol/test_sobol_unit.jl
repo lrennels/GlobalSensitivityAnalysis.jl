@@ -1,7 +1,8 @@
 using Test
 using Distributions
+using DataStructures
 
-import GlobalSensitivityAnalysis: scale_sobol_seq!, sample
+import GlobalSensitivityAnalysis: scale_samples!, ishigami, sample
 
 ##
 ## 1. utils
@@ -33,14 +34,6 @@ data3 = SobolData(params = parameters)
 data4 = SobolData(calc_second_order = false)
 data5 = SobolData(N = 100)
 
-# scale_sobol_seq!
-seq = rand(100, 8)
-original_seq = copy(seq)
-dists = [Normal(1, 0.2), Uniform(0.75, 1.25), LogNormal(0, 0.5), TriangularDist(0, 4, 1)]
-scale_sobol_seq!(seq, dists)
-@test size(seq) == size(original_seq)
-@test seq != original_seq
-
 ##
 ## 2. Sample Sobol
 ##
@@ -66,7 +59,7 @@ end
 @test_throws ErrorException sample(data5) # params are nothing
 
 ##
-## 4a. Analyze Sobol
+## 3a. Analyze Sobol
 ##
 
 Y1 = ishigami(samples)
@@ -108,7 +101,7 @@ end
 @test sum(results[:totalorder]) > sum(results[:firstorder])
 
 ##
-## 4b. Analyze Sobol Optional Keyword Args
+## 3b. Analyze Sobol Optional Keyword Args
 ##
 
 data = SobolData(
@@ -121,13 +114,9 @@ samples = sample(data)
 Y = ishigami(samples)
 results = analyze(data, Y)
 
-@test_throws ErrorException analyze(data, Y; num_resamples = nothing)
-@test_throws ErrorException analyze(data, Y; conf_level = nothing)
-
-@test length(analyze(data, Y; num_resamples = nothing, conf_level = nothing)) == 3 # no confidence intervals
 results = analyze(data, Y; progress_meter = false) # no progress bar should show
 
-@test length(analyze(data, Y; N_override = 10)) == 6 
+@test length(analyze(data, Y; N_override = 10)) == 6
 results_override = analyze(data, Y, N_override = data.N)
 results_original = analyze(data, Y)
 @test results_override[:firstorder] == results_original[:firstorder]

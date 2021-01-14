@@ -1,14 +1,41 @@
 using Test
 using GlobalSensitivityAnalysis
-import GlobalSensitivityAnalysis
 
-@testset "Compare to SALib.py" begin
-    include("test_sobolsequence.jl")
-    include("test_uniform.jl")
-    include("test_nonuniform.jl")
-    include("test_sobolCI.jl")
+ATOL_sample = 1e-8
+ATOL_sobol = 1e-9 # sobol method indices
+ATOL_delta = 1e-3 # delta method indices
+ATOL_CI = 1e-2
+
+# see: https://www.nature.com/articles/sdata2018187#Sec5
+include(joinpath(@__DIR__, "../src/quantile_matching/WRS.jl"))
+using .WRS
+
+@testset "Test Utils" begin
+    include("test_utils.jl")
 end
 
-@testset "Unit Testing" begin
-    include("unit_tests.jl")
+@testset "Test Sobol Method" begin
+
+    @testset "Compare to SALib.py" begin
+        include("sobol/test_sobol_sobolsequence.jl")
+        include("sobol/test_sobol_ishigami.jl")
+        include("sobol/test_sobol_borehole.jl")
+        include("sobol/test_sobol_ci.jl")
+    end
+
+    @testset "Unit Testing" begin
+        include("sobol/test_sobol_unit.jl")
+    end
+end
+
+@testset "Test Delta Method" begin
+
+    @testset "Compare to SALib.py" begin
+        include("delta/test_delta_ishigami.jl")
+        include("delta/test_delta_borehole.jl")
+    end
+
+    @testset "Unit Testing" begin
+        include("delta/test_delta_unit.jl")
+    end
 end

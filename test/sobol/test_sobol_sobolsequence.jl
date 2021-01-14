@@ -20,8 +20,8 @@ D = length(data.params)
 s = Sobol.SobolSeq(D) 
 Sobol_sobolseq = vcat(zeros(1,D), hcat([Sobol.next!(s) for i = 1:N-1]...)') # Sobol package sobol seq function
 
-py_sobolseq = load("data/py_uniform/py_sobolseq.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
+py_sobolseq = load("data/sobol/py_ishigami/py_sobolseq.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
 
 @testset "Sobol Sequence" begin
-    @test convert(Matrix, Sobol_sobolseq)  ≈ convert(Matrix, py_sobolseq)  atol = 1e-9
+    @test convert(Matrix, Sobol_sobolseq)  ≈ convert(Matrix, py_sobolseq)  atol = ATOL_sobol
 end
