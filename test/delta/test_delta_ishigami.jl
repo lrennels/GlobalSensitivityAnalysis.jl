@@ -12,10 +12,6 @@ import StatsBase: ordinalrank
 ## SETUP
 ################################################################################
 
-# see: https://www.nature.com/articles/sdata2018187#Sec5
-include(joinpath(@__DIR__, "../../src/quantile_matching/WRS.jl"))
-using .WRS
-
 # define the (uncertain) parameters of the problem and their distributions
 data = DeltaData(
     params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
@@ -27,14 +23,14 @@ data = DeltaData(
 N = data.N
 D = length(data.params)
 
-@testset "Uniform Sampling" begin
+@testset "Ishigami Function - Sampling" begin
 
-    py_samples = convert(Matrix, load("data/delta/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame)
+    py_samples = convert(Matrix, load("data/delta/py_ishigami/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame)
     julia_samples = GlobalSensitivityAnalysis.sample(data) 
 
     quants = [0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99]
     sig_level = 0.05
-    output_dir = joinpath(@__DIR__, "../output/LHS_QuantileTesting/uniform")
+    output_dir = joinpath(@__DIR__, "../output/LHS_QuantileTesting/ishigami")
     mkpath(output_dir)
 
     for i = 1:D
@@ -61,14 +57,14 @@ D = length(data.params)
 
 end
 
-@testset "Uniform Analysis" begin
+@testset "Ishigami Function - Analysis" begin
 
     # Get the samples - here we will use the Python samples to keep things consistent,
     # could also use Julia samples run through both the SALib and GSA functions
-    samples = load("data/delta/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
+    samples = load("data/delta/py_ishigami/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
     
     # check ishigami
-    python_Y = load("data/delta/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
+    python_Y = load("data/delta/py_ishigami/py_ishigami.csv", header_exists=false) |> DataFrame
     julia_Y = ishigami(convert(Array, samples))
     @test python_Y[:,1] ≈ julia_Y atol = ATOL_sample
 
@@ -76,10 +72,10 @@ end
     julia_results = analyze(data, convert(Array, samples), julia_Y; num_resamples = 1_000) 
 
     # python results
-    py_firstorder = load("data/delta/py_uniform/py_firstorder.csv", header_exists=false) |> DataFrame
-    py_delta = load("data/delta/py_uniform/py_delta.csv", header_exists=false) |> DataFrame
-    py_firstorder_conf = load("data/delta/py_uniform/py_firstorder_conf.csv", header_exists=false) |> DataFrame
-    py_delta_conf = load("data/delta/py_uniform/py_delta_conf.csv", header_exists=false) |> DataFrame
+    py_firstorder = load("data/delta/py_ishigami/py_firstorder.csv", header_exists=false) |> DataFrame
+    py_delta = load("data/delta/py_ishigami/py_delta.csv", header_exists=false) |> DataFrame
+    py_firstorder_conf = load("data/delta/py_ishigami/py_firstorder_conf.csv", header_exists=false) |> DataFrame
+    py_delta_conf = load("data/delta/py_ishigami/py_delta_conf.csv", header_exists=false) |> DataFrame
 
     # test indices - check values and orderings
     @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_delta

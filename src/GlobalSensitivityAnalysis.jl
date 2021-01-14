@@ -17,5 +17,6 @@ include("sample_delta.jl")
 include("analyze_sobol.jl")
 include("analyze_delta.jl")
 include("test_functions/ishigami.jl")
+include("test_functions/borehole.jl")
 
 end # module

@@ -34,32 +34,32 @@ julia_results = analyze(data, convert(Matrix, julia_ishigami); num_resamples = 1
 ################################################################################
 
 # sampling
-py_samples = load("data/sobol/py_uniform/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
-py_ishigami = load("data/sobol/py_uniform/py_ishigami.csv", header_exists=false) |> DataFrame
+py_samples = load("data/sobol/py_ishigami/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
+py_ishigami = load("data/sobol/py_ishigami/py_ishigami.csv", header_exists=false) |> DataFrame
 
 # analysis
-py_A = load("data/sobol/py_uniform/py_A.csv", header_exists=false) |> DataFrame
-py_B = load("data/sobol/py_uniform/py_B.csv", header_exists=false) |> DataFrame
-py_AB = load("data/sobol/py_uniform/py_AB.csv", header_exists=false) |> DataFrame
-py_BA = load("data/sobol/py_uniform/py_BA.csv", header_exists=false) |> DataFrame
+py_A = load("data/sobol/py_ishigami/py_A.csv", header_exists=false) |> DataFrame
+py_B = load("data/sobol/py_ishigami/py_B.csv", header_exists=false) |> DataFrame
+py_AB = load("data/sobol/py_ishigami/py_AB.csv", header_exists=false) |> DataFrame
+py_BA = load("data/sobol/py_ishigami/py_BA.csv", header_exists=false) |> DataFrame
 
-py_firstorder = load("data/sobol/py_uniform/py_firstorder.csv", header_exists=false) |> DataFrame
-py_secondorder = load("data/sobol/py_uniform/py_secondorder.csv", header_exists=false) |> DataFrame
-py_totalorder = load("data/sobol/py_uniform/py_totalorder.csv", header_exists=false) |> DataFrame
+py_firstorder = load("data/sobol/py_ishigami/py_firstorder.csv", header_exists=false) |> DataFrame
+py_secondorder = load("data/sobol/py_ishigami/py_secondorder.csv", header_exists=false) |> DataFrame
+py_totalorder = load("data/sobol/py_ishigami/py_totalorder.csv", header_exists=false) |> DataFrame
 
-py_firstorder_conf = load("data/sobol/py_uniform/py_firstorder_conf.csv", header_exists=false) |> DataFrame
-py_secondorder_conf = load("data/sobol/py_uniform/py_secondorder_conf.csv", header_exists=false) |> DataFrame
-py_totalorder_conf = load("data/sobol/py_uniform/py_totalorder_conf.csv", header_exists=false) |> DataFrame
+py_firstorder_conf = load("data/sobol/py_ishigami/py_firstorder_conf.csv", header_exists=false) |> DataFrame
+py_secondorder_conf = load("data/sobol/py_ishigami/py_secondorder_conf.csv", header_exists=false) |> DataFrame
+py_totalorder_conf = load("data/sobol/py_ishigami/py_totalorder_conf.csv", header_exists=false) |> DataFrame
 
 ################################################################################
 ## Testing
 ################################################################################
 
-@testset "Uniform Sampling" begin
-    @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = ATOL_sobol
+@testset "Ishigami Function - Sampling" begin
+    @test convert(Matrix, julia_samples) ≈ convert(Matrix, py_samples) atol = ATOL_sample
 end
 
-@testset "Uniform Analysis" begin
+@testset "Ishigami Function - Analysis" begin
     @test convert(Matrix, julia_ishigami) ≈ convert(Matrix, py_ishigami) atol = ATOL_sobol
     @test julia_A ≈ convert(Matrix, py_A) atol = ATOL_sobol
     @test julia_B ≈ convert(Matrix, py_B) atol = ATOL_sobol
