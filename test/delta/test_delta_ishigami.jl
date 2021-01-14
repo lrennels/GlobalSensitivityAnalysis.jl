@@ -3,7 +3,7 @@ using Test
 using DataFrames
 using CSVFiles
 using DataStructures
-using VegaLite
+# using VegaLite
 
 import GlobalSensitivityAnalysis: ishigami
 import StatsBase: ordinalrank
@@ -41,11 +41,11 @@ D = length(data.params)
         df = DataFrame(A = sampleA, B = sampleB)
         save(joinpath(output_dir, "samples$(N)_p$i.csv"), df)
 
-        # Quick plot comparison
-        p1 = df |> @vlplot(:bar, x = {:A, bin = {step=0.1}}, y="count()")
-        save(joinpath(output_dir, "sampleA_$(N)_p$i.png"), p1)
-        p2 = df |> @vlplot(:bar, x = {:B, bin = {step=0.1}}, y="count()", background=:white)
-        save(joinpath(output_dir, "sampleB_$(N)_p$i.png"), p2)
+        # # Quick plot comparison
+        # p1 = df |> @vlplot(:bar, x = {:A, bin = {step=0.1}}, y="count()")
+        # save(joinpath(output_dir, "sampleA_$(N)_p$i.png"), p1)
+        # p2 = df |> @vlplot(:bar, x = {:B, bin = {step=0.1}}, y="count()", background=:white)
+        # save(joinpath(output_dir, "sampleB_$(N)_p$i.png"), p2)
 
         # Run WRS quantile matching
         results = pb2gen(sampleA, sampleB, quantiles = quants) |> DataFrame
