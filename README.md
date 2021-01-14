@@ -17,7 +17,9 @@ The package currently includes the following methods:
 
 ## The API
 
-The API contains two primary functions: `sample` and `analyze`. These two functions call methods based on the type parameterization of their `data` argument, which is either of type `SobolData` or `DeltaData`.  **Note that for now the `sample` function will call the most used sampling protocol for the particular method, (Sobol sequence for Sobol method and Latin Hypercube sampling for Delta method), but in this future this will be rearranged and generalized since, for example, the Delta method can also just as well use Sobol sequence sampling and other methods.** 
+The API contains two primary functions: `sample` and `analyze`. These two functions call methods based on the type parameterization of their `data` argument, which is either of type `SobolData` or `DeltaData`.  
+
+**Note:** For now the `sample` function will call the most used sampling protocol for the particular method, (Sobol sequence for Sobol method and Latin Hypercube sampling for Delta method), but in this future this will be rearranged and generalized since, for example, the Delta method can also just as well use Sobol sequence sampling and other methods.
 
 ### Sobol Sensitivity Analyis
 
