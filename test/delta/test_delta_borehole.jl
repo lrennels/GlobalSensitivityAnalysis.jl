@@ -45,8 +45,8 @@ D = length(data.params)
         sampleB = julia_samples[:,i]
 
         # Make dataframe
-        df = DataFrame(A = sampleA, B = sampleB)
-        save(joinpath(output_dir, "samples$(N)_p$i.csv"), df)
+        # df = DataFrame(A = sampleA, B = sampleB)
+        # save(joinpath(output_dir, "samples$(N)_p$i.csv"), df)
 
         # # Quick plot comparison
         # p1 = df |> @vlplot(:bar, x = {:A, bin = {step=0.1}}, y="count()")
@@ -56,7 +56,7 @@ D = length(data.params)
 
         # Run WRS quantile matching
         results = pb2gen(sampleA, sampleB, quantiles = quants) |> DataFrame
-        save(joinpath(output_dir, "LHS Sampling Quantile Comparison N$(N)_p$i.csv"), results)
+        # save(joinpath(output_dir, "LHS Sampling Quantile Comparison N$(N)_p$i.csv"), results)
 
         @test sum(results[!,:signif]) == 0
     end
