@@ -37,7 +37,7 @@ D = length(data.params)
 
     quants = [0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99]
     sig_level = 0.05
-    output_dir = joinpath(@__DIR__, "../output/LHS_QuantileTesting/borehole")
+    output_dir = "/Users/lisarennels/.julia/dev/GlobalSensitivityAnalysis/output/LHS_QuantileTesting/borehole"
     mkpath(output_dir)
 
     for i = 1:D
