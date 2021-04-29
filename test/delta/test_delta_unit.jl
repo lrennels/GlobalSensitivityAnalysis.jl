@@ -96,7 +96,7 @@ results = analyze(data, samples, Y)
 results = analyze(data, samples, Y; progress_meter = false) # no progress bar should show
 results = analyze(data, samples, Y; num_resamples = 100, conf_level = 0.90, progress_meter = false) # keywords
 
-@test length(analyze(data, samples, Y; N_override = 10)) == 4 
+@test length(analyze(data, samples, Y; N_override = 10)) == 5 
 results_override = analyze(data, samples, Y; N_override = data.N)
 results_original = analyze(data, samples, Y)
 @test results_override[:firstorder] == results_original[:firstorder]
