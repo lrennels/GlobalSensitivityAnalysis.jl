@@ -10,7 +10,7 @@ import GlobalSensitivityAnalysis: ishigami
 # Goal: Replicate Fig 3. in Plischke et al. 2013
 # the SciML comparison is here in Section 4: https://github.com/danielalfonsetti/18337FinalProject/blob/master/18337final_project_daniel_alfonsetti.pdf
 
-output_dir = "/Users/lisarennels/.julia/dev/GlobalSensitivityAnalysis/output/LHS_QuantileTesting/Plischke2013_Fig3"
+output_dir = @joinpath(@__DIR__, "../output/LHS_QuantileTesting/Plischke2013_Fig3")
 
 # load SALib values
 SALib_deltas = [0.03675842, 0.03512737, 0.04431219, 0.03533525, 0.0386379 , 0.02777811]
