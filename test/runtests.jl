@@ -8,7 +8,6 @@ ATOL_CI = 1e-2
 
 # see: https://www.nature.com/articles/sdata2018187#Sec5
 include(joinpath(@__DIR__, "../src/quantile_matching/WRS.jl"))
-using .WRS
 
 @testset "Test Utils" begin
     include("test_utils.jl")

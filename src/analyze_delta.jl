@@ -62,6 +62,7 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
     model_output_grid = collect(LinRange(minimum(model_output), maximum(model_output), 100))
 
     # preallocate arrays 
+    delta_biased = Array{Float64}(undef, D)
     delta = Array{Float64}(undef, D)
     delta_conf = Array{Float64}(undef, D)
     firstorder = Array{Float64}(undef, D)
@@ -75,14 +76,14 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
         # increment progress meter
         counter += 1
         progress_meter ? ProgressMeter.update!(p, counter) : nothing  
-        
-        delta[i], delta_conf[i] = bias_reduced_delta(model_output, model_output_grid, model_input[:,i], m, num_resamples, conf_level)
+        delta_biased[i], delta[i], delta_conf[i] = bias_reduced_delta(model_output, model_output_grid, model_input[:,i], m, num_resamples, conf_level)
         firstorder[i] = sobol_first(model_output, model_input[:,i], m)
         firstorder_conf[i] = sobol_first_conf(model_output, model_input[:,i], m, num_resamples, conf_level)
     end
 
     results = Dict(
-        :delta              => delta,
+        :delta_biased       => delta_biased,
+        :delta              => delta, 
         :delta_conf         => delta_conf,
         :firstorder         => firstorder,
         :firstorder_conf    => firstorder_conf
@@ -133,7 +134,7 @@ function bias_reduced_delta(model_output::AbstractArray{<:Number, S1}, model_out
     d = 2 * d_hat .- d
     Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2)
 
-    return (mean(d), Z * std(d))
+    return (d_hat, mean(d), Z * std(d))
 end
 
 """

@@ -55,7 +55,7 @@ D = length(data.params)
         # save(joinpath(output_dir, "sampleB_$(N)_p$i.png"), p2)
 
         # Run WRS quantile matching
-        results = pb2gen(sampleA, sampleB, quantiles = quants) |> DataFrame
+        results = WRS.pb2gen(sampleA, sampleB, quantiles = quants) |> DataFrame
         # save(joinpath(output_dir, "LHS Sampling Quantile Comparison N$(N)_p$i.csv"), results)
 
         @test sum(results[!,:signif]) == 0
