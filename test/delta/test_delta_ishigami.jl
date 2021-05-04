@@ -27,7 +27,7 @@ D = length(data.params)
 
 @testset "Ishigami Function - Sampling" begin
 
-    py_samples = convert(Matrix, load("data/delta/py_ishigami/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame)
+    py_samples = load("data/delta/py_ishigami/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
     julia_samples = GlobalSensitivityAnalysis.sample(data) 
 
     quants = [0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99]
@@ -64,14 +64,15 @@ end
     # Get the samples - here we will use the Python samples to keep things consistent,
     # could also use Julia samples run through both the SALib and GSA functions
     samples = load("data/delta/py_ishigami/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
-    
+    samples = Matrix(samples)
+
     # check ishigami
     python_Y = load("data/delta/py_ishigami/py_ishigami.csv", header_exists=false) |> DataFrame
-    julia_Y = ishigami(convert(Array, samples))
+    julia_Y = ishigami(samples)
     @test python_Y[:,1] ≈ julia_Y atol = ATOL_sample
 
     # julia results
-    julia_results = analyze(data, convert(Array, samples), julia_Y; num_resamples = 1_000) 
+    julia_results = analyze(data, samples, julia_Y; num_resamples = 1_000) 
 
     # python results
     py_firstorder = load("data/delta/py_ishigami/py_firstorder.csv", header_exists=false) |> DataFrame
@@ -80,14 +81,14 @@ end
     py_delta_conf = load("data/delta/py_ishigami/py_delta_conf.csv", header_exists=false) |> DataFrame
 
     # test indices - check values and orderings
-    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_delta
+    @test julia_results[:firstorder] ≈ Matrix(py_firstorder) atol = ATOL_delta
     @test ordinalrank(julia_results[:firstorder]) == ordinalrank(py_firstorder[!,:Column1])
 
-    @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = 0.05 # TODO - this seems too high?
+    @test julia_results[:delta] ≈ Matrix(py_delta) atol = 0.05 # TODO - this seems too high?
     @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[!, :Column1])
 
     # test confidence intervals
-    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
-    @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI
+    @test julia_results[:firstorder_conf] ≈ Matrix(py_firstorder_conf) atol = ATOL_CI
+    @test julia_results[:delta_conf] ≈ Matrix(py_delta_conf) atol = ATOL_CI
 
 end
