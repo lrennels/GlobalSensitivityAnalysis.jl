@@ -104,11 +104,11 @@ data = SobolData(
 D = length(data.params)
 
 # sampling
-samples = sample(data) |> DataFrame
-Y = ishigami(convert(Matrix, samples)) |> DataFrame
+samples = sample(data)
+Y = ishigami(samples)
 
 # analysis
-A, B, AB, BA = split_output(convert(Matrix, Y), N, D, calc_second_order)
+A, B, AB, BA = split_output(Matrix(Y), N, D, calc_second_order)
 
 # confidence intervals  - constants
 r = [3 2 3;

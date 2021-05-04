@@ -67,14 +67,15 @@ end
 
     # Get the samples
     samples = load("data/delta/py_borehole/py_samples.csv", header_exists=false, colnames = ["rw", "r", "Tu", "Hu", "Tl", "Hl", "L", "Kw"]) |> DataFrame
-    
+    samples = Matrix(samples)
+
     # check borehole
     python_Y = load("data/delta/py_borehole/py_borehole.csv", header_exists=false) |> DataFrame
-    julia_Y = borehole(convert(Array, samples))
+    julia_Y = borehole(samples)
     @test python_Y[:,1] ≈ julia_Y atol = ATOL_sample
 
     # julia results
-    julia_results = analyze(data, convert(Array, samples), julia_Y; num_resamples = 1_000) 
+    julia_results = analyze(data, samples, julia_Y; num_resamples = 1_000) 
 
     # python results
     py_firstorder = load("data/delta/py_borehole/py_firstorder.csv", header_exists=false) |> DataFrame
@@ -83,14 +84,14 @@ end
     py_delta_conf = load("data/delta/py_borehole/py_delta_conf.csv", header_exists=false) |> DataFrame
 
     # test indices
-    @test julia_results[:firstorder] ≈ convert(Matrix, py_firstorder) atol = ATOL_delta
+    @test julia_results[:firstorder] ≈ Matrix(py_firstorder) atol = ATOL_delta
     @test ordinalrank(julia_results[:firstorder]) == ordinalrank(py_firstorder[!,:Column1])
 
-    @test julia_results[:delta] ≈ convert(Matrix, py_delta) atol = 0.05 # TODO - this seems too high?
+    @test julia_results[:delta] ≈ Matrix(py_delta) atol = 0.05 # TODO - this seems too high?
     @test ordinalrank(julia_results[:delta]) == ordinalrank(py_delta[!,:Column1])
 
     # test confidence intervals
-    @test julia_results[:firstorder_conf] ≈ convert(Matrix, py_firstorder_conf) atol = ATOL_CI
-    @test julia_results[:delta_conf] ≈ convert(Matrix, py_delta_conf) atol = ATOL_CI
+    @test julia_results[:firstorder_conf] ≈ Matrix(py_firstorder_conf) atol = ATOL_CI
+    @test julia_results[:delta_conf] ≈ Matrix(py_delta_conf) atol = ATOL_CI
 
 end
