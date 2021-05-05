@@ -2,7 +2,8 @@ using Statistics
 using Distributions
 using ProgressMeter
 using KernelDensity
-using NumericalIntegration
+# using NumericalIntegration
+using Trapz
 import StatsBase: ordinalrank
 
 #=
@@ -100,16 +101,18 @@ end
 function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
     N = length(model_output)
     k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib
-    fy = pdf(k, model_output_grid)
-    model_input_ranks = ordinalrank(model_input)
+    fy = Distributions.pdf(k, model_output_grid)
+    model_input_ranks = StatsBase.ordinalrank(model_input)
 
     d_hat = 0
     for j = 1:length(m) - 1
         ix = findall((model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1]))
         nm = length(ix)
         k = KernelDensity.kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
-        fyc = pdf(k, model_output_grid)
-        d_hat += (nm / (2 * N)) * integrate(model_output_grid, abs.(fy - fyc)) #  Trapezoidal() is default function
+        fyc = Distributions.pdf(k, model_output_grid)
+        # d_hat += (nm / (2 * N)) * NumericalIntegration.integrate(model_output_grid, abs.(fy - fyc)) #  Trapezoidal() is default function
+        d_hat += (nm / (2 * N)) * Trapz.trapz(model_output_grid, abs.(fy - fyc))
+
     end
     return d_hat
     
