@@ -102,7 +102,7 @@ function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid
     N = length(model_output)
     k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib
     fy = Distributions.pdf(k, model_output_grid)
-    model_input_ranks = StatsBase.ordinalrank(model_input)
+    model_input_ranks = ordinalrank(model_input)
 
     d_hat = 0
     for j = 1:length(m) - 1
