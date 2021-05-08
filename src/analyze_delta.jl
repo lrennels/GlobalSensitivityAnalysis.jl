@@ -58,9 +58,10 @@ function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, mode
         model_input = model_input[1:N,:]
     end
 
-    M = Int(min(ceil(N ^ (2 / (7 + tanh((1500 - N) / 500)))), 48))
+    exp =  (2 / (7 + tanh((1500 - N) / 500)))
+    M = Int(min(ceil(N ^ exp), 48))
     m = collect(LinRange(0, N, M + 1))
-    model_output_grid = collect(LinRange(minimum(model_output), maximum(model_output), 100))
+    model_output_grid = collect(LinRange(minimum(model_output), maximum(model_output), 100)) # note that SALIb defaults the YGridlength to 100, while GlobalSensitivity.jl defaults to 2048
 
     # preallocate arrays 
     delta_biased = Array{Float64}(undef, D)
@@ -101,17 +102,26 @@ end
 function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
     N = length(model_output)
     k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib
-    fy = Distributions.pdf(k, model_output_grid)
+    fy = Distributions.pdf(k, model_output_grid) # eq 23.1
     model_input_ranks = ordinalrank(model_input)
 
     d_hat = 0
     for j = 1:length(m) - 1
         ix = findall((model_input_ranks .> m[j]) .& (model_input_ranks .<= m[j + 1]))
         nm = length(ix)
+
+        # get the separation between the total y pdf and the condition y pdf induced by this class
+
+        # Estimated conditional distribution of y (using normal kernel)
         k = KernelDensity.kde(model_output[ix]) # defaults are kernel = normal and bandwidth = Silverman which match SALib
-        fyc = Distributions.pdf(k, model_output_grid)
-        # d_hat += (nm / (2 * N)) * NumericalIntegration.integrate(model_output_grid, abs.(fy - fyc)) #  Trapezoidal() is default function
-        d_hat += (nm / (2 * N)) * Trapz.trapz(model_output_grid, abs.(fy - fyc))
+        fyc = Distributions.pdf(k, model_output_grid) # eq 23.2
+        pdf_diff = abs.(fy - fyc) # eq 24
+
+        # Use trapezoidal rule to estimate the difference between the curves.
+        class_separation = Trapz.trapz(model_output_grid, pdf_diff) # eq 25
+
+        # Increment Estimator
+        d_hat += (nm / (2 * N)) * class_separation # eq 26
 
     end
     return d_hat
