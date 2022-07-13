@@ -4,8 +4,8 @@ using DataFrames
 using CSVFiles
 using DataStructures
 # using Plots 
-
 # using VegaLite
+using GlobalSensitivityAnalysis
 
 import GlobalSensitivityAnalysis: ishigami
 import StatsBase: ordinalrank

@@ -3,6 +3,7 @@ using Test
 using DataFrames
 using CSVFiles
 using DataStructures
+using GlobalSensitivityAnalysis
 # using VegaLite
 
 import GlobalSensitivityAnalysis: borehole
