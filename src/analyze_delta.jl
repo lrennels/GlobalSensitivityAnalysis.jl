@@ -2,8 +2,7 @@ using Statistics
 using Distributions
 using ProgressMeter
 using KernelDensity
-# using NumericalIntegration
-using Trapz
+using Trapz # alternative considered was NumericalIntegration
 import StatsBase: ordinalrank
 
 #=

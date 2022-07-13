@@ -3,9 +3,8 @@ using Test
 using DataFrames
 using CSVFiles
 using DataStructures
-# using Plots 
-# using VegaLite
 using GlobalSensitivityAnalysis
+# using VegaLite
 
 import GlobalSensitivityAnalysis: ishigami
 import StatsBase: ordinalrank
