@@ -16,8 +16,7 @@ The package currently includes the following methods:
 
 Much of this package is based on/transalted from[SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements several global sensitivity analysis measures in Python.  The present package seeks to implement several of these same algorithms in Julia along with providing a clear, user-friendly API.
 
-The license terms are provided below.
----
+The license terms are provided below:
 
 The MIT License (MIT)
 Copyright (c) 2013-2017 Jon Herman, Will Usher, and others.
@@ -28,7 +27,6 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
----
 ## The API
 
 The API contains two primary functions: `sample` and `analyze`. These two functions call methods based on the type parameterization of their `data` argument, which is either of type `SobolData` or `DeltaData`.  
