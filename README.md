@@ -16,8 +16,7 @@ The package currently includes the following methods:
 
 Much of this package is based on/transalted from[SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements several global sensitivity analysis measures in Python.  The present package seeks to implement several of these same algorithms in Julia along with providing a clear, user-friendly API.
 
-SALib Copyright notice:
-
+The license terms are provided below.
 ---
 
 The MIT License (MIT)
