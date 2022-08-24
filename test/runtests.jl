@@ -6,7 +6,6 @@ ATOL_sobol = 1e-9 # sobol method indices
 ATOL_delta = 1e-3 # delta method indices
 ATOL_CI = 1e-2
 
-# see: https://www.nature.com/articles/sdata2018187#Sec5
 include(joinpath(@__DIR__, "../src/quantile_matching/WRS.jl"))
 
 @testset "Test Utils" begin

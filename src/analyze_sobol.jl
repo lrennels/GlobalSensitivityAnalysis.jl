@@ -2,45 +2,55 @@ using Statistics
 using Distributions
 using ProgressMeter
 
-#=
-References
-----------
-    [1] Sobol, I. M. (2001).  "Global sensitivity indices for nonlinear
-        mathematical models and their Monte Carlo estimates."  Mathematics
-        and Computers in Simulation, 55(1-3):271-280,
-        doi:10.1016/S0378-4754(00)00270-6.
-    [2] Saltelli, A. (2002).  "Making best use of model evaluations to
-        compute sensitivity indices."  Computer Physics Communications,
-        145(2):280-297, doi:10.1016/S0010-4655(02)00280-1.
-    [3] Saltelli, A., P. Annoni, I. Azzini, F. Campolongo, M. Ratto, and
-        S. Tarantola (2010).  "Variance based sensitivity analysis of model
-        output.  Design and estimator for the total sensitivity index."
-        Computer Physics Communications, 181(2):259-270,
-        doi:10.1016/j.cpc.2009.09.018.
-=#
+# Adapted from: Herman, J. and Usher, W. (2017) SALib: An open-source Python 
+# library for sensitivity analysis. Journal of Open Source Software, 2(9)
+
+# References
+#
+#     [1] Sobol, I. M. (2001).  "Global sensitivity indices for nonlinear
+#         mathematical models and their Monte Carlo estimates."  Mathematics
+#         and Computers in Simulation, 55(1-3):271-280,
+#         doi:10.1016/S0378-4754(00)00270-6.
+#     [2] Saltelli, A. (2002).  "Making best use of model evaluations to
+#         compute sensitivity indices."  Computer Physics Communications,
+#         145(2):280-297, doi:10.1016/S0010-4655(02)00280-1.
+#     [3] Saltelli, A., P. Annoni, I. Azzini, F. Campolongo, M. Ratto, and
+#         S. Tarantola (2010).  "Variance based sensitivity analysis of model
+#         output.  Design and estimator for the total sensitivity index."
+#         Computer Physics Communications, 181(2):259-270,
+#         doi:10.1016/j.cpc.2009.09.018.
 
 """
-    analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
+    analyze(data::SobolData, 
+            model_output::AbstractArray{<:Number, S}; 
+            num_resamples::Union{Nothing, Int} = 1_000, 
+            conf_level::Union{Nothing, Number} = 0.95, 
+            progress_meter::Bool = true,
+            N_override::Union{Nothing, Integer}=nothing) where S
 
 Performs a Sobol Analysis on the `model_output` produced with the problem 
 defined by the information in `data` and returns the a dictionary of results
 with the sensitivity indices and respective confidence intervals for each of the
 parameters defined using the `num_resamples` and `conf_level` keyword args. If these
-are Nothing than no confidence intervals will be calculated. The `progress_meter`
+are nothing than no confidence intervals will be calculated. The `progress_meter`
 keyword argument indicates whether a progress meter will be displayed and defaults
 to true. The `N_override` keyword argument allows users to override the `N` used in
 a specific `analyze` call to analyze just a subset (useful for convergence graphs).
 """
-function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S
+function analyze(data::SobolData, 
+                model_output::AbstractArray{<:Number, S}; 
+                num_resamples::Union{Nothing, Int} = 1_000, 
+                conf_level::Union{Nothing, Number} = 0.95, 
+                progress_meter::Bool = true, 
+                N_override::Union{Nothing, Integer}=nothing) where S
 
     # handle confidence interval flag
-    num_nothings = (num_resamples === nothing) + (conf_level === nothing)
-    if num_nothings == 1
-        error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
-    elseif num_nothings == 2
+    if conf_level === nothing
         conf_flag = false
-    else
+    elseif num_resamples !== nothing
         conf_flag = true
+    else
+        error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
     end
 
     # define constants

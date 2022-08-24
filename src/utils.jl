@@ -69,20 +69,3 @@ function scale_samples!(sequence::AbstractArray{<:Number, N1}, dists::AbstractAr
         end
     end
 end
-
-"""
-    _check_conf_flag(num_resamples::Union{Nothing, Int}, conf_level::Union{Nothing, Number})        
-Check to see if confdience interval should be calculated based on the provided
-`num_resamples` and `conf_level`.  Error if only one has a value and the other is Nothing.
-"""
-function _check_conf_flag(num_resamples::Union{Nothing, Int}, conf_level::Union{Nothing, Number})
-    num_nothings = (num_resamples === nothing) + (conf_level === nothing)
-    if num_nothings == 1
-        error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
-    elseif num_nothings == 2
-        conf_flag = false
-    else
-        conf_flag = true
-    end
-    return conf_flag
-end
