@@ -1,4 +1,4 @@
-![](https://github.com/lrennels/GlobalSensitivityAnalysis.jl/workflows/Run%20CI%20on%20master/badge.svg)
+![](https://github.com/lrennels/GlobalSensitivityAnalysis.jl/actions/workflows/jlpkgbutler-ci-master-workflow.yml/badge.svg)
 [![codecov](https://codecov.io/gh/lrennels/GlobalSensitivityAnalysis.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/lrennels/GlobalSensitivityAnalysis.jl)
 [![Coverage Status](https://coveralls.io/repos/github/lrennels/GlobalSensitivityAnalysis.jl/badge.svg?branch=master)](https://coveralls.io/github/lrennels/GlobalSensitivityAnalysis.jl?branch=master)
 
@@ -6,26 +6,13 @@
 
 A Julia package which implements global sensitivity analysis methods.
 
+Much of this package is based on [SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements several global sensitivity analysis measures in Python.  The pacakge seeks to implement several of these same algorithms in Julia along with providing a clear, user-friendly API.
+
 The package currently includes the following methods:
 
 - Sobol Sensitivity Analysis ([Sobol 2001](http://www.sciencedirect.com/science/article/pii/S0378475400002706), [Saltelli 2002](http://www.sciencedirect.com/science/article/pii/S0010465502002801), [Saltelli et al. 2010](http://www.sciencedirect.com/science/article/pii/S0010465509003087))
 
 - Delta Moment-Independent Measure ([Borgonovo 2007](http://www.sciencedirect.com/science/article/pii/S0951832006000883), [Plischke et al. 2013](http://www.sciencedirect.com/science/article/pii/S0377221712008995))
-
-## SALib
-
-Much of this package is based on/transalted from[SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements several global sensitivity analysis measures in Python.  The present package seeks to implement several of these same algorithms in Julia along with providing a clear, user-friendly API.
-
-The license terms are provided below:
-
-The MIT License (MIT)
-Copyright (c) 2013-2017 Jon Herman, Will Usher, and others.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## The API
 
@@ -177,3 +164,4 @@ Some of the code in this package is derivative code based on the work of John He
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+
