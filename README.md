@@ -1,4 +1,4 @@
-![](https://github.com/lrennels/GlobalSensitivityAnalysis.jl/workflows/Run%20CI%20on%20master/badge.svg)
+![](https://github.com/lrennels/GlobalSensitivityAnalysis.jl/actions/workflows/jlpkgbutler-ci-master-workflow.yml/badge.svg)
 [![codecov](https://codecov.io/gh/lrennels/GlobalSensitivityAnalysis.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/lrennels/GlobalSensitivityAnalysis.jl)
 [![Coverage Status](https://coveralls.io/repos/github/lrennels/GlobalSensitivityAnalysis.jl/badge.svg?branch=master)](https://coveralls.io/github/lrennels/GlobalSensitivityAnalysis.jl?branch=master)
 
