@@ -1,9 +1,18 @@
+module Test_Sobol_CI
+
 using Distributions
 using DataStructures
 using DataFrames
 using Test
+using GlobalSensitivityAnalysis
 
 import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order, sample
+
+# TODO use these tolerances
+ATOL_sample = 1e-8
+ATOL_CI = 1e-2
+ATOL_sobol = 1e-9
+
 #
 # STEP 1. try running confidence intervals a few times and looking at the means etc. 
 # and then compare that to doing the same for Python SALib 
@@ -130,3 +139,5 @@ end
 
 @test firstorder_conf ≈ [1.57157685, 0.61660013, 0.81296287] atol = 1e-8
 @test totalorder_conf ≈ [2.26661086, 0.36204958, 0.46523933] atol = 1e-8
+
+end

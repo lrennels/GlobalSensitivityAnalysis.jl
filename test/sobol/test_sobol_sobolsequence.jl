@@ -1,9 +1,14 @@
+module Test_Sobol_SobolSequence
+
 using Test
 using DataFrames
 using CSVFiles
 using DataStructures
 using Sobol
 using Distributions
+using GlobalSensitivityAnalysis
+
+ATOL_sobol = 1e-9
 
 # define the (uncertain) parameters of the problem and their distributions
 # (this data was used for the pre-computed py_sobolseq)
@@ -20,8 +25,8 @@ D = length(data.params)
 s = Sobol.SobolSeq(D) 
 Sobol_sobolseq = vcat(zeros(1,D), hcat([Sobol.next!(s) for i = 1:N-1]...)') # Sobol package sobol seq function
 
-py_sobolseq = load("data/sobol/py_ishigami/py_sobolseq.csv", header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
+py_sobolseq = load(joinpath(@__DIR__, "../data/sobol/py_ishigami/py_sobolseq.csv"), header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
 
-@testset "Sobol Sequence" begin
-    @test convert(Matrix, Sobol_sobolseq)  ≈ Matrix(py_sobolseq)  atol = ATOL_sobol
+@test convert(Matrix, Sobol_sobolseq)  ≈ Matrix(py_sobolseq)  atol = ATOL_sobol
+
 end

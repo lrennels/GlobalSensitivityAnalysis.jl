@@ -16,7 +16,7 @@
 #         doi:10.1016/j.cpc.2009.09.018.
 
 """
-    sample(data::SobolData)
+    sample(data::SobolData; numskip = 1000)
 
 Generate a matrix containing the model inputs for Sobol sensitivity analysis with 
 the information in the `data`. In this function we apply Saltelli's 
@@ -25,16 +25,39 @@ a way to reduce the error rates in the resulting sensitivity index calculations.
 matrix has `N` * (2`D` + 2) rows when second order indices are calculated,and `N` * (`D` + 2) 
 when this calculation is omitted, where `D` is the number of parameters and `N` is the
 number of samples.
+
+The `numskip` parameter indicates the number of values to skip from the initial 
+sequence.
+
+From SALib:
+
+-----
+The initial points of the Sobol' sequence has some repetition (see Table 2
+in Campolongo [1]), which can be avoided by setting the `skip_values`
+parameter. Skipping values reportedly improves the uniformity of samples.
+It has been shown that naively skipping values may reduce accuracy,
+increasing the number of samples needed to achieve convergence
+(see Owen [2]).
+
+A recommendation adopted here is that both `skip_values` and `N` be a power
+of 2, where `N` is the desired number of samples (see [2] and discussion in
+[5] for further context). It is also suggested therein that
+``skip_values >= N``.
+
+The method now defaults to setting `skip_values` to a power of two that is
+``>= N``. If `skip_values` is provided, the method now raises a UserWarning
+in cases where sample sizes may be sub-optimal according to the
+recommendation above.
+
+# TODO - implement this improved default numskip strategy instead of the older
+# set-to-1000 scheme
 """
-function sample(data::SobolData)
+function sample(data::SobolData; numskip = 1000)
 
     # check for parameters
     if data.params === nothing
         error("Cannot sample to generate model inputs because there are no parameters")
     end
-
-    # set number of values to skip from the initial sequence 
-    numskip = 1000
 
     # constants     
     D = length(data.params) # number of uncertain parameters in problem
