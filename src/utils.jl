@@ -1,7 +1,3 @@
-using Distributions
-using DataStructures
-using Statistics
-
 """
     SobolData
 

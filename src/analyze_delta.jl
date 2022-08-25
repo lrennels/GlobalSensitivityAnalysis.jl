@@ -1,8 +1,3 @@
-using Statistics
-using Distributions
-using ProgressMeter
-using KernelDensity
-using Trapz # alternative considered was NumericalIntegration
 import StatsBase: ordinalrank
 
 # Adapted from: Herman, J. and Usher, W. (2017) SALib: An open-source Python 
