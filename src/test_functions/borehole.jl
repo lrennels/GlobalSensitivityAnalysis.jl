@@ -4,8 +4,8 @@
 """
     borehole(param_values::AbstractArray{<:Number, N})
 
-Return an `N` by 1 array of results of the Borehole function (http://www.sfu.ca/~ssurjano/borehole.html)
-using the `N` by 8 array of `param_values`.
+Return an `N`-by-1 array of results of the Borehole function (http://www.sfu.ca/~ssurjano/borehole.html)
+using the `N`-by-8 array of `param_values`.
 """
 function borehole(param_values::AbstractArray{<:Number, N}) where N
 

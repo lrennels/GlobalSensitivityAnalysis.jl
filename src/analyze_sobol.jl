@@ -45,16 +45,15 @@ function analyze(data::SobolData,
                 N_override::Union{Nothing, Integer}=nothing) where S
 
     # handle confidence interval flag
-    if conf_level === nothing
+    if isnothing(conf_level)
         conf_flag = false
-    elseif num_resamples !== nothing
+    elseif !isnothing(num_resamples)
         conf_flag = true
     else
-        error("Number of resamples is $num_resamples, while confidence level is $conf_level ... either none or both must be nothing")
+        error("A non-nothing confidence level ($conf_level) requires a specified number of resamples.")
     end
 
     # define constants
-    calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
 
     # deal with overriding N
@@ -83,18 +82,18 @@ function analyze(data::SobolData,
     model_output = (model_output .- mean(model_output)) ./ std(model_output)
 
     # separate the model_output into results from matrices "A". "B" and "AB" 
-    A, B, AB, BA = split_output(model_output, N, D, calc_second_order)
+    A, B, AB, BA = split_output(model_output, N, D, data.calc_second_order)
 
     # preallocate arrays for indices
     firstorder = Array{Float64}(undef, D)
     totalorder = Array{Float64}(undef, D)
-    calc_second_order ? secondorder =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing) : nothing
+    data.calc_second_order ? secondorder =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing) : nothing
 
     # preallocate arrays for confidence intervals
     if conf_flag
         firstorder_conf = Array{Float64}(undef, D)
         totalorder_conf = Array{Float64}(undef, D)
-        calc_second_order ? secondorder_conf =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing) : nothing
+        data.calc_second_order ? secondorder_conf =  fill!(Array{Union{Float64, Missing}}(undef, D, D), missing) : nothing
     end
 
     # set up progress meter
@@ -116,7 +115,7 @@ function analyze(data::SobolData,
         conf_flag ? totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r])) : nothing
 
         # second order indices
-        if calc_second_order
+        if data.calc_second_order
             for j in (i+1):D
                 secondorder[i, j] = second_order(A, AB[:, i], AB[:, j], BA[:, i], B)[1] # array to scalar with [1]
                 conf_flag ? secondorder_conf[i,j] = Z * std(skipmissing(second_order(A[r], AB[r, i], AB[r, j], BA[r, i], B[r]))) : nothing
@@ -124,7 +123,7 @@ function analyze(data::SobolData,
         end
     end
 
-    if calc_second_order
+    if data.calc_second_order
         if conf_flag
             results = Dict(
                 :firstorder         => firstorder,

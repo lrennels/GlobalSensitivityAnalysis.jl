@@ -4,8 +4,8 @@
 """
     ishigami(param_values::AbstractArray{<:Number, N})
 
-Return an `N` by 1 array of results of the non-monotonic Ishigami Function using the
-`N` by 3 array of `param_values`.
+Return an `N`-by-1 array of results of the non-monotonic Ishigami Function using the
+`N`-by-3 array of `param_values`.
 """
 function ishigami(param_values::AbstractArray{<:Number, N}) where N
 

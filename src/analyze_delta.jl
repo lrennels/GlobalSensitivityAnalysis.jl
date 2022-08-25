@@ -49,15 +49,16 @@ function analyze(data::DeltaData,
     # number of resamples
 
     if size(model_output, 2) != 1
-        error("Model output for analyzing DeltaData has more than one col, not handled yet.")
+        error("Model output for analyzing DeltaData has more than one column, this is not yet supported.")
     else
-        model_output = vec(model_output)
+        model_output = vec(model_output) # convert to a Vector
     end
 
     # define constants
     D = length(data.params) # number of uncertain parameters in problem
+
     # deal with overriding N
-    if N_override === nothing
+    if isnothing(N_override)
         N = data.N # number of samples
     else
         N_override > data.N ? error("N_override ($N_override) cannot be greater than original N used in sampling ($(data.N))") : nothing 
@@ -112,7 +113,7 @@ Plischke et al. 2013 estimator (eqn 26) for d_hat
 function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
                     model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
     N = length(model_output)
-    k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib
+    k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib specification
     fy = Distributions.pdf(k, model_output_grid) # eq 23.1
     model_input_ranks = ordinalrank(model_input)
 
@@ -149,6 +150,7 @@ Plischke et al. 2013 bias reduction technique (eqn 30)
 function bias_reduced_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
                             model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}, num_resamples::Int,
                             conf_level::Number) where S1 where S2
+
     d = zeros(num_resamples)
     d_hat = calc_delta(model_output, model_output_grid, model_input, m)
 
@@ -188,6 +190,7 @@ end
 """
 function sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1},
                         m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
+                        
     s = zeros(num_resamples)
     Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2)
 

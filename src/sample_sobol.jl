@@ -40,20 +40,18 @@ function sample(data::SobolData)
     numskip = 1000
 
     # constants     
-    calc_second_order = data.calc_second_order 
     D = length(data.params) # number of uncertain parameters in problem
-    N = data.N # number of samples
 
     seq = Sobol.SobolSeq(2 * D)
-    base_seq = hcat([Sobol.next!(seq) for i = 1:N + numskip - 1]...)' 
+    base_seq = hcat([Sobol.next!(seq) for i = 1:data.N + numskip - 1]...)' 
     base_seq = base_seq[numskip:end, :] # SALIb includes first row of zeros, so skip one less
     scale_samples!(base_seq, [values(data.params)...]) # scale
 
     # create the Saltelli sequence
-    if calc_second_order
-        saltelli_seq = Array{Float64}(undef, N * (2 * D + 2), D)
+    if data.calc_second_order
+        saltelli_seq = Array{Float64}(undef, data.N * (2 * D + 2), D)
     else
-        saltelli_seq = Array{Float64}(undef, N * (D + 2), D)
+        saltelli_seq = Array{Float64}(undef, data.N * (D + 2), D)
     end
 
     # The Saltelli sequence is made up of N blocks of (D + 2) rows (if don't
@@ -63,7 +61,7 @@ function sample(data::SobolData)
 
     index = 1
 
-    for i in 1:N
+    for i in 1:data.N
 
         # copy matrix "A" (first row of each block)
         for j in 1:D
@@ -87,7 +85,7 @@ function sample(data::SobolData)
         # for each parameter, place elements of "A" into "B" and insert those D 
         # rows of "BA" (bottom set of middle rows of each block) 
         # Only needed if you're doing second-order indices 
-        if calc_second_order
+        if data.calc_second_order
             for k in 1:D
                 for j in 1:D
                     if j == k
