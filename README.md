@@ -4,9 +4,9 @@
 
 # Global Sensitivity Analysis
 
-A Julia package which implements global sensitivity analysis methods.
+A Julia package which implements global sensitivity analysis methods. It is also created to work in concert with the sensitivity analysis functionality of [Mimi.jl][https://www.mimiframework.org].
 
-Much of this package is based on [SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements several global sensitivity analysis measures in Python.  The pacakge seeks to implement several of these same algorithms in Julia along with providing a clear, user-friendly API.
+Much of this package is based on [SALib](https://github.com/SALib/SALib) (Herman and Usher, 2017) which implements several global sensitivity analysis measures in Python.  The package seeks to implement several of these same algorithms in Julia using a clear, user-friendly API.
 
 The package currently includes the following methods:
 
@@ -16,28 +16,31 @@ The package currently includes the following methods:
 
 ## The API
 
-The API contains two primary functions: `sample` and `analyze`. These two functions call methods based on the type parameterization of their `data` argument, which is either of type `SobolData` or `DeltaData`.  
+The API contains two primary functions: `sample` and `analyze`. These two functions call methods based on the type-parameterization of their `data` argument, which is either of type `SobolData` or `DeltaData`.  
 
-**Note:** For now the `sample` function will call the most used sampling protocol for the particular method, (Sobol sequence for Sobol method and Latin Hypercube sampling for Delta method), but in this future this will be rearranged and generalized since, for example, the Delta method can also just as well use Sobol sequence sampling and other methods.
+**Note:** For now the `sample` function will call the most used sampling protocol for the particular method, (Sobol sequence for Sobol method and Latin Hypercube sampling for Delta method), but in the future this will be rearranged and generalized since, for example, the Delta method can also just as well use Sobol sequence sampling and other methods.
 
 ### Sobol Sensitivity Analyis
 
 Sampling with `sample` is the first of the two main steps in an analysis, generating the model inputs to be run through a model of choice and produce the outputs analyzed in the `analyze` function.  The signature for this function is as follows.
 
 ```julia
+"""
     sample(data::SobolData)
 
 Generate a matrix containing the model inputs for Sobol sensitivity analysis with 
-the information in the `data`. In this function we apply Saltelli's 
+the information in `data`. In this function we apply Saltelli's 
 extension of the Sobol  sequence. Saltelli's scheme extends the Sobol sequence in 
 a way to reduce the error rates in the resulting sensitivity index calculations. 
 The resulting matrix has `N` * (`D` + 2) rows, where `D` is the number of parameters 
 and `N` is the number of samples.
+"""
 ```
 
 The single argument to this function is of type `SobolData`, a custom type designed to hold all information needed for sampling and analysis. A `SobolData` struct is parameterized by a `params` dictionary (NOTE that this must be an `OrderedDict`, not a `Dict`) which maps parameter names to their Distributions, `calc_second_order` determining whether or not to calculate second-order sensitivity indices, and the desired number of runs `N`.
 
 ```julia
+"""
     SobolData
 
 A struct which holds all information needed for the sampling and analysis of a
@@ -46,15 +49,18 @@ specific problem using Sobol Analysis:
 `params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
 `calc_second_order::Bool = true`: whether or not to calculate second order sensitivity indices
 `N::Int = 1000`: the number of runs
+"""
 ```
 
 After sampling with `sample`, use the resulting matrix of parameter combinations to run your model, producing a vector of results.  The next and final step is to analyze the results with your `model_output` using the `analyze` function with the signature below. This function takes the same `SobolData` as `sample`, as well as the `model_output` vector and produces a dictionary of results.  This dictionary will include the `:firstorder`, `:totalorder` indices and (optionally) confidence intervals for each parameter.
 
 ```julia
+"""
     function analyze(data::SobolData, model_output::AbstractArray{<:Number, S}; num_resamples::Union{Nothing, Int} = 1_000, conf_level::Union{Nothing, Number} = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) 
 
 Performs a Sobol Analysis on the `model_output` produced with the problem defined by the information in `data` and returns the a dictionary of results with the sensitivity indices and respective confidence intervals for each of the
-parameters defined using the `num_resamples` and `conf_level` keyword args. If these are Nothing than no confidence intervals will be calculated. The `progress_meter` keyword argument indicates whether a progress meter will be displayed and defaults to true. The `N_override` keyword argument allows users to override the `N` used in a specific `analyze` call to analyze just a subset (useful for convergence graphs).
+parameters defined using the `num_resamples` and `conf_level` keyword args. If these are `nothing` than no confidence intervals will be calculated. The `progress_meter` keyword argument indicates whether a progress meter will be displayed and defaults to true. The `N_override` keyword argument allows users to override the `N` used in a specific `analyze` call to analyze just a subset (useful for convergence graphs).
+"""
 ```
 
 An example of the basic flow can be found in `src/main.jl` using the Ishigami test function in `src/test_functions/ishigami.jl`, and is copied and commented below for convenience.
@@ -63,9 +69,9 @@ An example of the basic flow can be found in `src/main.jl` using the Ishigami te
 using Distributions
 using DataStructures
 
-include("sample_sobol.jl")
-include("analyze_sobol.jl")
-include("test_functions/ishigami.jl")
+include("src/sample_sobol.jl")
+include("src/analyze_sobol.jl")
+include("src/test_functions/ishigami.jl")
 
 # define the data
 data = SobolData(
@@ -89,14 +95,17 @@ analyze(data, Y)
 Sampling with `sample` is the first of the two main steps in an analysis, generating the model inputs to be run through a model of choice and produce the outputs analyzed in the `analyze` function.  The signature for this function is as follows.
 
 ```julia
+"""
     sample(data::DeltaData)
 
 Generate a matrix containing the model inputs for Delta Moment-Independent Measure sensitivity analysis with the information in the `data`. In this function we apply Latin Hypercube Sampling. The resulting matrix has `N` columns * `D` rows, where `D` is the number of parameters and `N` is the number of samples.
+"""
 ```
 
 The single argument to this function is of type `DeltaData`, a custom type designed to hold all information needed for sampling and analysis. A `DeltaData` struct is parameterized by a `params` dictionary (NOTE that this must be an `OrderedDict`, not a `Dict`) which maps parameter names to their Distributions and the desired number of runs `N`.
 
 ```julia
+"""
     DeltaData
 
 A struct which holds all information needed for the sampling and analysis of a
@@ -104,6 +113,7 @@ specific problem using Sobol Analysis:
 
 `params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
 `N::Int = 1000`: the number of runs
+"""
 ```
 
 After sampling with `sample`, use the resulting matrix of parameter combinations to run your model, producing a vector of results.  The next and final step is to analyze the results with your `model_output` using the `analyze` function with the signature below. This function takes the same `DeltaData` as `sample`, as well as the `model_output` vector and produces a dictionary of results.  This dictionary will include the `:firstorder`, `:delta` indices and confidence intervals for each parameter.

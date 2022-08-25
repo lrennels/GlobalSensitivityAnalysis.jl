@@ -1,24 +1,25 @@
-using Statistics
-using Distributions
-using ProgressMeter
-using KernelDensity
-using Trapz # alternative considered was NumericalIntegration
 import StatsBase: ordinalrank
 
-#=
-References
-----------
-    [1] Borgonovo, E. (2007). "A new uncertainty importance measure."
-       Reliability Engineering & System Safety, 92(6):771-784,
-       doi:10.1016/j.ress.2006.04.015.
+# Adapted from: Herman, J. and Usher, W. (2017) SALib: An open-source Python 
+# library for sensitivity analysis. Journal of Open Source Software, 2(9)
 
-    [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
-       sensitivity measures from given data." European Journal of
-       Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
-=#
+# References
+# ----------
+#     [1] Borgonovo, E. (2007). "A new uncertainty importance measure."
+#        Reliability Engineering & System Safety, 92(6):771-784,
+#        doi:10.1016/j.ress.2006.04.015.
+#     [2] Plischke, E., E. Borgonovo, and C. L. Smith (2013). "Global
+#        sensitivity measures from given data." European Journal of
+#        Operational Research, 226(3):536-550, doi:10.1016/j.ejor.2012.11.047.
 
 """
-    analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, model_output::AbstractArray{<:Number, S2}; num_resamples::Int = 1_000, conf_level::Number = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S1 where S2 
+    analyze(data::DeltaData, 
+            model_input::AbstractArray{<:Number, S1}, 
+            model_output::AbstractArray{<:Number, S2}; 
+            num_resamples::Int = 1_000, 
+            conf_level::Number = 0.95, 
+            progress_meter::Bool = true, 
+            N_override::Union{Nothing, Integer}=nothing) where S1 where S2 
 
 Performs a Delta Moment-Independent Analysis on the `model_output` produced with 
 the problem defined by the information in `data` and `model_input` and returns
@@ -29,24 +30,30 @@ will be displayed and defaults to true. The `N_override` keyword argument allows
 to override the `N` used in a specific `analyze` call to analyze just a subset 
 (useful for convergence graphs).
 """
-function analyze(data::DeltaData, model_input::AbstractArray{<:Number, S1}, model_output::AbstractArray{<:Number, S2}; num_resamples::Int = 1_000, conf_level::Number = 0.95, progress_meter::Bool = true, N_override::Union{Nothing, Integer}=nothing) where S1 where S2 
+function analyze(data::DeltaData,
+                model_input::AbstractArray{<:Number, S1}, 
+                model_output::AbstractArray{<:Number, S2}; 
+                num_resamples::Int = 1_000, 
+                conf_level::Number = 0.95, 
+                progress_meter::Bool = true, 
+                N_override::Union{Nothing, Integer}=nothing) where S1 where S2 
     
-    # this method requires a confidence interval and num_resamples, so we do not
-    # currently allow these to be set to Nothing as we did with the Sobol method ...
-    # if a user wants to limit run time for intial tries they can set a very low
+    # This method requires a confidence interval and num_resamples, so we do not
+    # currently allow these to be set to Nothing as we did with the Sobol method.
+    # If a user wants to limit run time for intial tries they can set a very low
     # number of resamples
-    # conf_flag = _check_conf_flag(num_resamples, conf_level)
 
     if size(model_output, 2) != 1
-        error("Model output for analyzing DeltaData has more than one col, not handled yet.")
+        error("Model output for analyzing DeltaData has more than one column, this is not yet supported.")
     else
-        model_output = vec(model_output)
+        model_output = vec(model_output) # convert to a Vector
     end
 
     # define constants
     D = length(data.params) # number of uncertain parameters in problem
+
     # deal with overriding N
-    if N_override === nothing
+    if isnothing(N_override)
         N = data.N # number of samples
     else
         N_override > data.N ? error("N_override ($N_override) cannot be greater than original N used in sampling ($(data.N))") : nothing 
@@ -94,13 +101,14 @@ end
 
 """
     calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
-        model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
+                model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
 
-    Plischke et al. 2013 estimator (eqn 26) for d_hat
+Plischke et al. 2013 estimator (eqn 26) for d_hat
 """
-function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
+function calc_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
+                    model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
     N = length(model_output)
-    k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib
+    k = KernelDensity.kde(model_output) # defaults are kernel = normal and bandwidth = Silverman which match SALib specification
     fy = Distributions.pdf(k, model_output_grid) # eq 23.1
     model_input_ranks = ordinalrank(model_input)
 
@@ -129,12 +137,15 @@ end
 
 """
     bias_reduced_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
-        model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}, num_resamples::Int, 
-        conf_level::Number) where S1 where S2
+                        model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}, num_resamples::Int, 
+                        conf_level::Number) where S1 where S2
 
 Plischke et al. 2013 bias reduction technique (eqn 30)
 """
-function bias_reduced_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
+function bias_reduced_delta(model_output::AbstractArray{<:Number, S1}, model_output_grid::AbstractArray{<:Number, 1}, 
+                            model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}, num_resamples::Int,
+                            conf_level::Number) where S1 where S2
+
     d = zeros(num_resamples)
     d_hat = calc_delta(model_output, model_output_grid, model_input, m)
 
@@ -151,9 +162,10 @@ end
 
 """
     sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::AbstractArray{<:Number, S2}, 
-        m::AbstractArray{<:Number, 1}) where S1 where S2
+                m::AbstractArray{<:Number, 1}) where S1 where S2
 """
-function sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::AbstractArray{<:Number, S2}, m::AbstractArray{<:Number, 1}) where S1 where S2
+function sobol_first(model_output::AbstractArray{<:Number, S1}, model_input::AbstractArray{<:Number, S2}, 
+                    m::AbstractArray{<:Number, 1}) where S1 where S2
     model_input_ranks = ordinalrank(model_input)
     Vi = 0
     N = length(model_output)
@@ -171,7 +183,9 @@ end
     sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, 
         m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
 """
-function sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1}, m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
+function sobol_first_conf(model_output::AbstractArray{<:Number, S2}, model_input::AbstractArray{<:Number, S1},
+                        m::AbstractArray{<:Number, 1}, num_resamples::Int, conf_level::Number) where S1 where S2
+                        
     s = zeros(num_resamples)
     Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2)
 

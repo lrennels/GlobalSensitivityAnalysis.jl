@@ -1,9 +1,6 @@
 using Distributions
 using DataStructures
-
-include("sample_sobol.jl")
-include("analyze_sobol.jl")
-include("test_functions/ishigami.jl")
+using GlobalSensitivityAnalysis
 
 # define the data
 data = SobolData(

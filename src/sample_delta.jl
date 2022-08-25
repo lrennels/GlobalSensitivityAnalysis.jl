@@ -1,5 +1,5 @@
-using Distributions
-using Random
+# Adapted from: Herman, J. and Usher, W. (2017) SALib: An open-source Python 
+# library for sensitivity analysis. Journal of Open Source Software, 2(9)
 
 """
     sample(data::DeltaData)
@@ -17,16 +17,15 @@ function sample(data::DeltaData)
 
     # constants     
     D = length(data.params) # number of uncertain parameters in problem
-    N = data.N # number of samples
-    d = 1.0 / N
+    d = 1.0 / data.N
 
     # preallocate
-    result = zeros(N, D)
-    temp = zeros(N)
+    result = zeros(data.N, D)
+    temp = zeros(data.N)
 
     # generate samples
     for i = 1:D
-        for j = 1:N
+        for j = 1:data.N
             
             low = (j - 1) * d
             high = j * d

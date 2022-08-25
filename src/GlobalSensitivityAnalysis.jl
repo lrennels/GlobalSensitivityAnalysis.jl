@@ -1,9 +1,15 @@
 module GlobalSensitivityAnalysis
 
 using DataStructures
+using Distributed
 using Distributions
-using Statistics
+using KernelDensity
+using ProgressMeter
+using Random
 using Sobol
+using Statistics 
+using StatsBase
+using Trapz # alternative considered was NumericalIntegration
 
 export 
     sample, 

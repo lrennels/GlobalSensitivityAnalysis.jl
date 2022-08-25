@@ -1,8 +1,11 @@
+# Adapted from: Herman, J. and Usher, W. (2017) SALib: An open-source Python 
+# library for sensitivity analysis. Journal of Open Source Software, 2(9)
+
 """
     borehole(param_values::AbstractArray{<:Number, N})
 
-Return an `N` by 1 array of results of the Borehole function (http://www.sfu.ca/~ssurjano/borehole.html)
-using the `N` by 8 array of `param_values`.
+Return an `N`-by-1 array of results of the Borehole function (http://www.sfu.ca/~ssurjano/borehole.html)
+using the `N`-by-8 array of `param_values`.
 """
 function borehole(param_values::AbstractArray{<:Number, N}) where N
 
