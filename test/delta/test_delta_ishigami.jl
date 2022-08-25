@@ -35,7 +35,7 @@ D = length(data.params)
 ## Sampling
 ##
 
-py_samples = load(joinpath(@__DIR__, "../data/delta/py_ishigami/py_samples.csv", header_exists=false, colnames = ["x1", "x2", "x3"])) |> DataFrame
+py_samples = load(joinpath(@__DIR__, "../data/delta/py_ishigami/py_samples.csv"), header_exists=false, colnames = ["x1", "x2", "x3"]) |> DataFrame
 julia_samples = GlobalSensitivityAnalysis.sample(data) 
 
 quants = [0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99]
