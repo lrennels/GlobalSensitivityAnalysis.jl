@@ -11,6 +11,8 @@ using GlobalSensitivityAnalysis
 import GlobalSensitivityAnalysis: borehole, sample
 import StatsBase: ordinalrank
 
+include("../WRS.jl") # quantile matching function
+
 ################################################################################
 ## SETUP
 ################################################################################
