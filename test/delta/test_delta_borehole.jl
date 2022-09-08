@@ -13,6 +13,10 @@ import StatsBase: ordinalrank
 
 include("../WRS.jl") # quantile matching function
 
+ATOL_delta = 1e-3
+ATOL_sample = 1e-8
+ATOL_CI = 1e-2
+
 ################################################################################
 ## SETUP
 ################################################################################
