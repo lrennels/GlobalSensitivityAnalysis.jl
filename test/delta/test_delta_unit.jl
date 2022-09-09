@@ -1,3 +1,5 @@
+module Test_Delta_Unit
+
 using Test
 using Distributions
 using DataStructures
@@ -102,3 +104,5 @@ results_override = analyze(data, samples, Y; N_override = data.N)
 results_original = analyze(data, samples, Y)
 @test results_override[:firstorder] == results_original[:firstorder]
 @test_throws ErrorException analyze(data, samples, Y; N_override = data.N + 1) # N_override > N
+
+end

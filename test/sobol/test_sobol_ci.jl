@@ -1,9 +1,15 @@
+module Test_Sobol_CI
+
 using Distributions
 using DataStructures
 using DataFrames
 using Test
+using GlobalSensitivityAnalysis
 
 import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order, sample
+
+ATOL_CI = 1e-2
+
 #
 # STEP 1. try running confidence intervals a few times and looking at the means etc. 
 # and then compare that to doing the same for Python SALib 
@@ -44,8 +50,8 @@ for i = 1:iter
     totalorder_all[i,:] = results[:totalorder_conf]
 end
 
-@test mean(firstorder_all, dims = 1) ≈ [0.06369217 0.05347996 0.05821841] atol = 1e-3
-@test mean(totalorder_all, dims = 1) ≈ [0.08792231 0.04021016 0.02634918] atol = 1e-3
+@test mean(firstorder_all, dims = 1) ≈ [0.06369217 0.05347996 0.05821841] atol = ATOL_CI
+@test mean(totalorder_all, dims = 1) ≈ [0.08792231 0.04021016 0.02634918] atol = ATOL_CI
 
 #
 # STEP 1B. Non-Uniform Case 
@@ -82,8 +88,8 @@ for i = 1:iter
     totalorder_all[i,:] = results[:totalorder_conf]
 end
 
-@test mean(firstorder_all, dims = 1) ≈ [0.00638154 0.0948373  0.67803243] atol = 1e-1
-@test mean(totalorder_all, dims = 1) ≈ [0.01245481 0.09457124 0.10595523] atol = 1e-1
+@test mean(firstorder_all, dims = 1) ≈ [0.00638154 0.0948373  0.67803243] atol = ATOL_CI
+@test mean(totalorder_all, dims = 1) ≈ [0.01245481 0.09457124 0.10595523] atol = ATOL_CI
 
 #
 # STEP 2. Deterministic example
@@ -128,5 +134,7 @@ for i in 1:D
     totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r]))
 end
 
-@test firstorder_conf ≈ [1.57157685, 0.61660013, 0.81296287] atol = 1e-8
-@test totalorder_conf ≈ [2.26661086, 0.36204958, 0.46523933] atol = 1e-8
+@test firstorder_conf ≈ [1.57157685, 0.61660013, 0.81296287] atol = ATOL_CI
+@test totalorder_conf ≈ [2.26661086, 0.36204958, 0.46523933] atol = ATOL_CI
+
+end

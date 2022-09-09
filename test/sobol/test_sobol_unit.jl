@@ -1,6 +1,9 @@
+module Test_Sobol_Unit
+
 using Test
 using Distributions
 using DataStructures
+using GlobalSensitivityAnalysis
 
 import GlobalSensitivityAnalysis: scale_samples!, ishigami, sample
 
@@ -122,3 +125,5 @@ results_original = analyze(data, Y)
 @test results_override[:firstorder] == results_original[:firstorder]
 @test results_override[:totalorder] == results_original[:totalorder] 
 @test_throws ErrorException analyze(data1, Y1; N_override = data.N + 1) # N_override > N
+
+end
