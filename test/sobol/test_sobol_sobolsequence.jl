@@ -29,4 +29,18 @@ py_sobolseq = load(joinpath(@__DIR__, "../data/sobol/py_ishigami/py_sobolseq.csv
 
 @test convert(Matrix, Sobol_sobolseq)  ≈ Matrix(py_sobolseq)  atol = ATOL_sobol
 
+s = Sobol.SobolSeq(3)
+expected = [[0.5, 0.5, 0.5], # note does not start with 0s as do some Sobol sequences
+                [0.75, 0.25, 0.25],
+                [0.25, 0.75, 0.75],
+                [0.375, 0.375, 0.625],
+                [0.875, 0.875, 0.125],
+                [0.625, 0.125, 0.875],
+                [0.125, 0.625, 0.375],
+                [0.1875, 0.3125, 0.9375],
+                [0.6875, 0.8125, 0.4375]]
+for i in 1:9
+    @test [Sobol.next!(s)...] == expected[i] # skips teh zeros
+end
+
 end

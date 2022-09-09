@@ -26,6 +26,11 @@ end
         @info("sobol/test_sobol_unit.jl")
         include("sobol/test_sobol_unit.jl")
     end
+
+    @testset "Regression Testing" begin
+        @info("sobol/test_sobol_regression.jl")
+        include("sobol/test_sobol_regression.jl")
+    end
 end
 
 @testset "Test Delta Method" begin
@@ -37,5 +42,10 @@ end
 
     @testset "Unit Testing" begin
         include("delta/test_delta_unit.jl")
+    end
+
+    @testset "Regression Testing" begin
+        @info("delta/test_delta_regression.jl")
+        include("delta/test_delta_regression.jl")
     end
 end
