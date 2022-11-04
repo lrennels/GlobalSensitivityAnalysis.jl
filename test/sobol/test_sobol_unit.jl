@@ -122,8 +122,8 @@ results = analyze(data, Y; progress_meter = false) # no progress bar should show
 @test length(analyze(data, Y; N_override = 10)) == 6
 results_override = analyze(data, Y, N_override = data.N)
 results_original = analyze(data, Y)
-@test results_override[:firstorder] == results_original[:firstorder]
-@test results_override[:totalorder] == results_original[:totalorder] 
+@test results_override[:firstorder] ≈ results_original[:firstorder] atol = 1e-9
+@test results_override[:totalorder] ≈ results_original[:totalorder] atol = 1e-9
 @test_throws ErrorException analyze(data1, Y1; N_override = data.N + 1) # N_override > N
 
 end
