@@ -37,6 +37,26 @@ mutable struct DeltaData
 end
 
 """
+    PAWNData
+
+A struct which holds all information needed for the sampling and analysis of a
+specific problem using PAWN Analysis:
+
+`params::Union{OrderedDict{Symbol, <:Any}, Nothing} = nothing`: a dictionary mapping parameter names to their Distribution
+`N::Int = 1000`: the number of runs
+`S::Int = 10`: the number of slides (conditioning points)
+"""
+mutable struct PAWNData
+    params::Union{OrderedDict{Symbol, <:Any}, Nothing}
+    N::Int
+    S::Int
+
+    function PAWNData(; params=nothing, N=1000, S=10)
+        return new(params, N, S)
+    end
+end
+
+"""
     scale_samples!(sequence::AbstractArray{<:Number, N1}, dists::AbstractArray{T, N2})
 
 Rescale a Sobol `sequence` of parameters from the 0-to-1 range to their corresponding 
