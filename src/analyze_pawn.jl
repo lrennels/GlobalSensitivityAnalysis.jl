@@ -95,7 +95,7 @@ function analyze(
 
     replace!(t_res, NaN => 0.0, Inf => 0.0)
 
-    results::Dict{Symbol, Vector{Float64}} = Dict(
+    results::OrderedDict{Symbol,Vector{Float64}} = OrderedDict(
         :min => t_res[:, 1],
         :mean => t_res[:, 2],
         :median => t_res[:, 3],
