@@ -47,16 +47,16 @@ Dict, of min, mean, median, max, std, and cv summary statistics.
 """
 function analyze(
     data::PAWNData,
-    model_input::AbstractArray{<:Number, S1},
-    model_output::AbstractArray{<:Number, S2};
-    progress_meter::Bool = true
-)::Dict{Symbol, Vector{Float64}} where S1 where S2
+    model_input::AbstractArray{<:Number,S1},
+    model_output::AbstractArray{<:Number,S2};
+    progress_meter::Bool=true
+)::OrderedDict{Symbol,Vector{Float64}} where {S1} where {S2}
 
     S = data.S
-
     N, D = size(model_input)
     step = 1 / S
 
+    # Preallocate intermediate stores
     X_di = zeros(N)
     X_q = zeros(S + 1)
     pawn_t = zeros(S + 1, D)
@@ -71,7 +71,7 @@ function analyze(
     with_logger(NullLogger()) do
         for d_i in 1:D
             counter += 1
-            progress_meter ? ProgressMeter.update!(p, counter) : nothing  
+            progress_meter ? ProgressMeter.update!(p, counter) : nothing
 
             X_di .= model_input[:, d_i]
             X_q .= quantile(X_di, seq)
