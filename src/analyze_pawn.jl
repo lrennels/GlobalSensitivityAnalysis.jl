@@ -76,7 +76,7 @@ function analyze(
             X_di .= model_input[:, d_i]
             X_q .= quantile(X_di, seq)
             for s in 1:S
-                Y_sel = model_output[(X_di.>=X_q[s]).&(X_di.<X_q[s+1])]
+                Y_sel = model_output[(X_q[s].<X_di).&(X_di.<=X_q[s+1])]
                 if length(Y_sel) == 0
                     pawn_t[s, d_i] = 0.0
                     continue  # no available samples
