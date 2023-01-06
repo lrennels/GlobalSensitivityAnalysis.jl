@@ -59,7 +59,7 @@ function analyze(
     # Preallocate intermediate stores
     X_di = zeros(N)
     X_q = zeros(S + 1)
-    pawn_t = zeros(S + 1, D)
+    pawn_t = zeros(S, D)
     t_res = zeros(D, 6)
 
     seq = 0:step:1
