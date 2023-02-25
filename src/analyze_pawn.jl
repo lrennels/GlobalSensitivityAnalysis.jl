@@ -75,10 +75,16 @@ function analyze(
 
             X_di .= model_input[:, d_i]
             X_q .= quantile(X_di, seq)
-            for s in 1:S
+
+            # Assess lowest bin first
+            Y_sel = y[X_q[1].<=X_di.<=X_q[2]]
+            if length(Y_sel) > 0
+                pawn_t[1, d_i] = ks_statistic(ApproximateTwoSampleKSTest(Y_sel, y))
+            end
+
+            for s in 2:S
                 Y_sel = model_output[(X_q[s].<X_di).&(X_di.<=X_q[s+1])]
                 if length(Y_sel) == 0
-                    pawn_t[s, d_i] = 0.0
                     continue  # no available samples
                 end
 
