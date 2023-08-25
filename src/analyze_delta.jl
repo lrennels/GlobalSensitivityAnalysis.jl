@@ -43,6 +43,8 @@ function analyze(data::DeltaData,
     # If a user wants to limit run time for intial tries they can set a very low
     # number of resamples
 
+    @warn "The GlobalSensitivityAnalysis delta method is a beta-release undergoing further testing, please use the method with this knowledge and notify the developers with any issues or questions."
+
     if size(model_output, 2) != 1
         error("Model output for analyzing DeltaData has more than one column, this is not yet supported.")
     else
