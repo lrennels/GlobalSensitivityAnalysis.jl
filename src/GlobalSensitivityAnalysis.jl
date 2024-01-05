@@ -15,13 +15,15 @@ export
     sample, 
     analyze, 
     SobolData, 
-    DeltaData
+    DeltaData,
+    PAWNData
 
 include("utils.jl")
 include("sample_sobol.jl")
 include("sample_delta.jl")
 include("analyze_sobol.jl")
 include("analyze_delta.jl")
+include("analyze_pawn.jl")
 include("test_functions/ishigami.jl")
 include("test_functions/borehole.jl")
 
