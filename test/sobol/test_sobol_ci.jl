@@ -1,140 +1,144 @@
-module Test_Sobol_CI
-
-using Distributions
-using DataStructures
-using DataFrames
-using Test
-using GlobalSensitivityAnalysis
-
-import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order, sample
-
-ATOL_CI = 1e-2
-
 #
-# STEP 1. try running confidence intervals a few times and looking at the means etc. 
-# and then compare that to doing the same for Python SALib 
+# Run confidence intervals a few times, look at the means etc. and compare that to
+# doing the same for Python SALib.
 #
 
-#
-# STEP 1A. Uniform Case 
-#
+@testitem "sobol CI uniform" begin
+    using Distributions
+    using DataStructures
+    using Statistics
 
-# define problem and some constants
-N = 1_000
-num_resamples = 10_000
-conf_level = 0.95
-calc_second_order = false
-iter = 10
+    import GlobalSensitivityAnalysis: ishigami, sample
 
-data = SobolData(
-    params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
-        :x2 => Uniform(-3.14159265359, 3.14159265359),
-        :x3 => Uniform(-3.14159265359, 3.14159265359)),
-    N = N,
-    calc_second_order = calc_second_order
-)
+    ATOL_CI = 1e-2
 
-D = length(data.params)
+    # define problem and some constants
+    N = 1_000
+    num_resamples = 10_000
+    conf_level = 0.95
+    calc_second_order = false
+    iter = 10
 
-# run sampling since this is deterministic
-samples = sample(data) # generate samples using Sobol sequence
-Y = ishigami(samples) # run model (example)
+    data = SobolData(
+        params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
+            :x2 => Uniform(-3.14159265359, 3.14159265359),
+            :x3 => Uniform(-3.14159265359, 3.14159265359)),
+        N = N,
+        calc_second_order = calc_second_order
+    )
 
-# iteratively perform Sobol Analysis and save confidence intervals
-firstorder_all = zeros(iter, D)
-totalorder_all = zeros(iter, D)
+    D = length(data.params)
 
-for i = 1:iter
-    results = analyze(data, Y; num_resamples = num_resamples) 
-    firstorder_all[i,:] = results[:firstorder_conf]
-    totalorder_all[i,:] = results[:totalorder_conf]
+    # run sampling since this is deterministic
+    samples = sample(data) # generate samples using Sobol sequence
+    Y = ishigami(samples) # run model (example)
+
+    # iteratively perform Sobol Analysis and save confidence intervals
+    firstorder_all = zeros(iter, D)
+    totalorder_all = zeros(iter, D)
+
+    for i = 1:iter
+        results = analyze(data, Y; num_resamples = num_resamples) 
+        firstorder_all[i,:] = results[:firstorder_conf]
+        totalorder_all[i,:] = results[:totalorder_conf]
+    end
+
+    @test mean(firstorder_all, dims = 1) ≈ [0.06369217 0.05347996 0.05821841] atol = ATOL_CI
+    @test mean(totalorder_all, dims = 1) ≈ [0.08792231 0.04021016 0.02634918] atol = ATOL_CI
 end
 
-@test mean(firstorder_all, dims = 1) ≈ [0.06369217 0.05347996 0.05821841] atol = ATOL_CI
-@test mean(totalorder_all, dims = 1) ≈ [0.08792231 0.04021016 0.02634918] atol = ATOL_CI
+@testitem "sobol CI non-uniform" begin
+    using Distributions
+    using DataStructures
+    using Statistics
 
-#
-# STEP 1B. Non-Uniform Case 
-#
+    import GlobalSensitivityAnalysis: ishigami, sample
 
-# define problem and some constants
-N = 1_000
-num_resamples = 10_000
-conf_level = 0.95
-calc_second_order = false
-iter = 10
+    ATOL_CI = 1e-2
 
-data = SobolData(
-    params = OrderedDict(:x1 => Normal(1, 0.2),
-        :x2 => Uniform(0.75, 1.25),
-        :x3 => LogNormal(0, 0.5)),
-    N = N,
-    calc_second_order = calc_second_order
-)
+    # define problem and some constants
+    N = 1_000
+    num_resamples = 10_000
+    conf_level = 0.95
+    calc_second_order = false
+    iter = 10
 
-D = length(data.params)
+    data = SobolData(
+        params = OrderedDict(:x1 => Normal(1, 0.2),
+            :x2 => Uniform(0.75, 1.25),
+            :x3 => LogNormal(0, 0.5)),
+        N = N,
+        calc_second_order = calc_second_order
+    )
 
-# run sampling since this is deterministic
-samples = sample(data) # generate samples using Sobol sequence
-Y = ishigami(samples) # run model (example)
+    D = length(data.params)
 
-# iteratively perform Sobol Analysis and save confidence intervals
-firstorder_all = zeros(iter, D)
-totalorder_all = zeros(iter, D)
+    # run sampling since this is deterministic
+    samples = sample(data) # generate samples using Sobol sequence
+    Y = ishigami(samples) # run model (example)
 
-for i = 1:iter
-    results = analyze(data, Y; num_resamples = num_resamples) 
-    firstorder_all[i,:] = results[:firstorder_conf]
-    totalorder_all[i,:] = results[:totalorder_conf]
+    # iteratively perform Sobol Analysis and save confidence intervals
+    firstorder_all = zeros(iter, D)
+    totalorder_all = zeros(iter, D)
+
+    for i = 1:iter
+        results = analyze(data, Y; num_resamples = num_resamples) 
+        firstorder_all[i,:] = results[:firstorder_conf]
+        totalorder_all[i,:] = results[:totalorder_conf]
+    end
+
+    @test mean(firstorder_all, dims = 1) ≈ [0.00638154 0.0948373  0.67803243] atol = ATOL_CI
+    @test mean(totalorder_all, dims = 1) ≈ [0.01245481 0.09457124 0.10595523] atol = ATOL_CI
 end
 
-@test mean(firstorder_all, dims = 1) ≈ [0.00638154 0.0948373  0.67803243] atol = ATOL_CI
-@test mean(totalorder_all, dims = 1) ≈ [0.01245481 0.09457124 0.10595523] atol = ATOL_CI
+@testitem "sobol CI deterministic" begin
+    using Distributions
+    using DataStructures
+    using Statistics
 
-#
-# STEP 2. Deterministic example
-#
+    import GlobalSensitivityAnalysis: ishigami, split_output, first_order, total_order, sample
 
-# define problem and constants
-N = 5
-conf_level = 0.95
-calc_second_order = false
+    ATOL_CI = 1e-2
 
-data = SobolData(
-    params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
-        :x2 => Uniform(-3.14159265359, 3.14159265359),
-        :x3 => Uniform(-3.14159265359, 3.14159265359)),
-    N = N,
-    calc_second_order = calc_second_order
-)
-D = length(data.params)
+    # define problem and constants
+    N = 5
+    conf_level = 0.95
+    calc_second_order = false
 
-# sampling
-samples = sample(data)
-Y = ishigami(samples)
+    data = SobolData(
+        params = OrderedDict(:x1 => Uniform(-3.14159265359, 3.14159265359),
+            :x2 => Uniform(-3.14159265359, 3.14159265359),
+            :x3 => Uniform(-3.14159265359, 3.14159265359)),
+        N = N,
+        calc_second_order = calc_second_order
+    )
+    D = length(data.params)
 
-# analysis
-A, B, AB, BA = split_output(Matrix(Y), N, D, calc_second_order)
+    # sampling
+    samples = sample(data)
+    Y = ishigami(samples)
 
-# confidence intervals  - constants
-r = [3 2 3;
-    4 1 1;
-    3 2 0;
-    1 2 2;
-    1 1 1]
-r = r .+ 1
-Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
+    # analysis
+    A, B, AB, BA = split_output(Matrix(Y), N, D, calc_second_order)
 
-# confidence intervals - calculate
-firstorder_conf = Array{Float64}(undef, D)
-totalorder_conf = Array{Float64}(undef, D)
+    # confidence intervals  - constants
+    r = [3 2 3;
+        4 1 1;
+        3 2 0;
+        1 2 2;
+        1 1 1]
+    r = r .+ 1
+    Z = quantile(Normal(0.0, 1.0),1 - (1 - conf_level)/2) # calculate z* for CI
 
-for i in 1:D
-    firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r]))
-    totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r]))
-end
+    # confidence intervals - calculate
+    firstorder_conf = Array{Float64}(undef, D)
+    totalorder_conf = Array{Float64}(undef, D)
 
-@test firstorder_conf ≈ [1.57157685, 0.61660013, 0.81296287] atol = ATOL_CI
-@test totalorder_conf ≈ [2.26661086, 0.36204958, 0.46523933] atol = ATOL_CI
+    for i in 1:D
+        firstorder_conf[i] = Z * std(first_order(A[r], AB[r, i], B[r]))
+        totalorder_conf[i] = Z * std(total_order(A[r], AB[r, i], B[r]))
+    end
 
+    @test firstorder_conf ≈ [1.57157685, 0.61660013, 0.81296287] atol = ATOL_CI
+    @test totalorder_conf ≈ [2.26661086, 0.36204958, 0.46523933] atol = ATOL_CI
 end
