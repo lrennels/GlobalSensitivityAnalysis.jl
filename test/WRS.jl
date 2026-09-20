@@ -26,8 +26,7 @@
 # Dolginow, A., ... & Anthoff, D. (2018). Mimi-PAGE, an open-source implementation 
 # of the PAGE09 integrated assessment model. Scientific data, 5(1), 1-8.
 
-
-module WRS
+@testmodule WRS begin
 
 using Distributions
 using Distributed
@@ -91,4 +90,4 @@ function pb2gen(x, y; quantiles=[0.05, 0.25, 0.5, 0.75, 0.95], alpha=0.05, nboot
     end
 end
 
-end # module
+end # testmodule
