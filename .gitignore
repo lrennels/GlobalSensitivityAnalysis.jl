@@ -4,3 +4,4 @@ test/DS_Store
 Manifest.toml
 output/
 *.ipnb_checkpoints
+.vscode/settings.json
